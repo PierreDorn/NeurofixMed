@@ -1,213 +1,517 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─── NeuroFix Med — Design System ─────────────────────────────── */
 :root {
-  --brand: #349870;
-  --brand-light: #57b389;
-  --brand-dark: #1c6147;
-  --bg: #f0f7f3;
-  --surface: #ffffff;
-  --border: #d4e8dc;
-  --text: #1a2e22;
-  --muted: #5a7a68;
+  /* Cores principais — fundo negro premium */
+  --bg:        #050505;
+  --bg2:       #0a0a0a;
+  --surface:   #111111;
+  --surface2:  #181818;
+  --border:    rgba(201,164,85,0.14);
+  --border2:   rgba(201,164,85,0.26);
+
+  /* Texto */
+  --text:      #f1f5f9;
+  --soft:      #cbd5e1;
+  --muted:     #64748b;
+
+  /* Marca — Ouro NeuroFix */
+  --gold:      #C9A455;
+  --gold-light:#E8CA7A;
+  --gold-dim:  rgba(201,164,85,0.12);
+  --gold-glow: rgba(201,164,85,0.22);
+
+  /* Marca — Azul-aço médico */
+  --steel:     #6B9EC4;
+  --steel-light:#8BBFDF;
+  --steel-dim: rgba(107,158,196,0.12);
+
+  /* Aliases de compatibilidade */
+  --green:     #C9A455;   /* ouro como primário */
+  --green-dim: rgba(201,164,85,0.12);
+  --green-glow:rgba(201,164,85,0.22);
+  --blue:      #6B9EC4;   /* azul-aço médico */
+  --blue-dim:  rgba(107,158,196,0.12);
+
+  /* Status */
+  --red:       #ef4444;
+  --yellow:    #f59e0b;
+  --purple:    #a78bfa;
+
+  /* Efeitos */
+  --radius:    16px;
+  --shadow:    0 20px 60px rgba(0,0,0,0.6);
+  --shadow-sm: 0 4px 16px rgba(0,0,0,0.4);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ─── Reset ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── Base ─────────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Atkinson Hyperlegible', sans-serif;
+  font-family: 'Atkinson Hyperlegible', 'Inter', sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.7;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 {
-  font-family: 'Fraunces', serif;
+/* Atkinson Hyperlegible — ótima para dislexia e TDAH */
+h1, h2, h3, h4 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
   line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--text);
 }
 
-a { color: var(--brand); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a { color: var(--green); text-decoration: none; }
+a:hover { opacity: 0.85; }
 
+/* ─── Layout do App (sidebar + conteúdo) ───────────────────────── */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ─── Sidebar ───────────────────────────────────────────────────── */
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 20px var(--gold-glow);
+  flex-shrink: 0;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logo-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--text);
+  letter-spacing: -0.03em;
+}
+
+.logo-tagline {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding: 12px 10px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: var(--soft);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-item.active {
+  background: var(--gold-dim);
+  border-color: var(--gold-glow);
+  color: var(--gold-light);
+}
+
+.nav-item .nav-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.05);
+}
+
+.nav-item.active .nav-icon {
+  background: var(--gold-glow);
+}
+
+.sidebar-footer {
+  padding: 12px 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── Conteúdo principal ────────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(5,5,5,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.topbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--soft);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-content {
+  padding: 28px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+}
+
+/* ─── Cards ─────────────────────────────────────────────────────── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  transition: box-shadow 0.2s;
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.card:hover { box-shadow: 0 4px 20px rgba(52,152,112,0.1); }
 
+.card:hover { border-color: var(--border2); }
+
+.card-green {
+  background: var(--green-dim);
+  border-color: var(--green-glow);
+}
+
+.card-blue {
+  background: var(--blue-dim);
+  border-color: rgba(56,189,248,0.2);
+}
+
+/* ─── Botões ─────────────────────────────────────────────────────── */
 button, .btn {
   font-family: 'Atkinson Hyperlegible', sans-serif;
   cursor: pointer;
   border: none;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 0.9rem;
-  padding: 0.65rem 1.2rem;
-  transition: all 0.2s;
+  font-size: 14px;
+  padding: 10px 18px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .btn-primary {
-  background: var(--brand);
-  color: white;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #0a0a0a;
+  font-weight: 800;
 }
-.btn-primary:hover { background: var(--brand-dark); transform: translateY(-1px); }
+.btn-primary:hover {
+  background: linear-gradient(135deg, #B8943F, var(--gold));
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px var(--gold-glow);
+}
 
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--soft);
+  border: 1px solid var(--border2);
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.07);
+  color: var(--text);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--border2);
+}
+
+.btn-danger {
+  background: rgba(239,68,68,0.12);
+  color: #fca5a5;
+  border: 1px solid rgba(239,68,68,0.2);
+}
+.btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+/* Botão grande de sair */
+.btn-sair {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  width: 100%;
+  justify-content: center;
+}
+.btn-sair:hover { border-color: var(--red); color: var(--red); }
+
+/* ─── Inputs ──────────────────────────────────────────────────────── */
 input, textarea, select {
   font-family: 'Atkinson Hyperlegible', sans-serif;
-  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  border: 1.5px solid var(--border2);
   border-radius: 12px;
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-  outline: none;
-  background: var(--bg);
+  padding: 11px 14px;
+  font-size: 14px;
   color: var(--text);
-  transition: border-color 0.2s;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
 }
+input::placeholder, textarea::placeholder { color: var(--muted); }
 input:focus, textarea:focus, select:focus {
-  border-color: var(--brand);
-  background: white;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-dim);
 }
 
-nav {
-  background: white;
-  border-bottom: 1px solid var(--border);
-  padding: 0.9rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.nav-logo {
-  font-family: 'Fraunces', serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--brand);
-  text-decoration: none;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.nav-links a {
-  color: var(--muted);
-  font-weight: 700;
-  font-size: 0.9rem;
-  text-decoration: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-.nav-links a:hover {
-  background: rgba(52,152,112,0.08);
-  color: var(--brand);
-}
-
+/* ─── Badges ──────────────────────────────────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
+  padding: 4px 10px;
   border-radius: 100px;
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 700;
-  background: rgba(52,152,112,0.1);
-  color: var(--brand);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.page-header {
-  background: linear-gradient(135deg, #134d36, #1c6147);
-  color: white;
-  padding: 2.5rem 1.5rem;
-  margin-bottom: 2rem;
-}
-.page-header h1 { color: white; }
-.page-header p { color: rgba(255,255,255,0.65); margin-top: 0.4rem; }
+.badge-green { background: var(--gold-dim);  color: var(--gold-light); border: 1px solid var(--gold-glow); }
+.badge-blue  { background: var(--steel-dim); color: var(--steel-light); border: 1px solid rgba(107,158,196,0.28); }
+.badge-red   { background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
+.badge-yellow{ background: rgba(245,158,11,0.1); color: #fcd34d; border: 1px solid rgba(245,158,11,0.2); }
 
-main { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 4rem; }
-
-.grid-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.subject-card {
-  background: white;
-  border: 2px solid var(--border);
-  border-radius: 16px;
-  padding: 1.25rem 1.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: block;
-  text-decoration: none;
-  color: var(--text);
-}
-.subject-card:hover {
-  border-color: var(--brand);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(52,152,112,0.15);
-  text-decoration: none;
-}
-.subject-card .icon { font-size: 2rem; margin-bottom: 0.75rem; }
-.subject-card h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
-.subject-card p { font-size: 0.85rem; color: var(--muted); }
-
-.perfil-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.9rem;
+/* ─── Barras de progresso ─────────────────────────────────────────── */
+.progress-bar {
+  height: 8px;
+  background: var(--surface2);
   border-radius: 100px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  background: rgba(52,152,112,0.1);
-  color: var(--brand);
-  border: 1px solid rgba(52,152,112,0.2);
-}
-
-.sair-btn {
-  background: transparent;
-  border: 1.5px solid var(--border) !important;
-  color: var(--muted);
-  font-size: 0.85rem;
-  padding: 0.4rem 1rem;
-  border-radius: 10px;
-}
-.sair-btn:hover { border-color: #ef4444 !important; color: #ef4444; background: rgba(239,68,68,0.05); }
-
-.task-item {
-  background: white;
+  overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1rem 1.25rem;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--gold), var(--steel));
+  box-shadow: 0 0 12px var(--gold-glow);
+  transition: width 0.5s ease;
+}
+
+/* ─── Flashcards ──────────────────────────────────────────────────── */
+.flashcard {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.flashcard:hover { border-color: var(--gold-glow); box-shadow: 0 0 0 1px var(--gold-glow), var(--shadow); }
+
+.btn-errei  { background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.25); }
+.btn-dificil{ background: rgba(245,158,11,0.12); color: #fcd34d; border: 1px solid rgba(245,158,11,0.25); }
+.btn-facil  { background: rgba(34,197,94,0.12);  color: #86efac; border: 1px solid rgba(34,197,94,0.25); }
+
+.btn-errei:hover  { background: rgba(239,68,68,0.22); }
+.btn-dificil:hover{ background: rgba(245,158,11,0.22); }
+.btn-facil:hover  { background: rgba(34,197,94,0.22); }
+
+/* ─── Questões ─────────────────────────────────────────────────────── */
+.alternativa {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  transition: box-shadow 0.2s;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 14px;
+  text-align: left;
 }
-.task-item:hover { box-shadow: 0 2px 12px rgba(52,152,112,0.08); }
+.alternativa:hover { border-color: var(--border2); background: rgba(255,255,255,0.04); }
+.alternativa.correta { border-color: var(--green); background: var(--green-dim); color: #bbf7d0; }
+.alternativa.errada  { border-color: var(--red); background: rgba(239,68,68,0.08); color: #fca5a5; }
 
-.perfil-tdah body { font-size: 1.1rem; line-height: 1.9; }
-.perfil-autismo { --surface: #f5faf7; }
-.perfil-dislexia body { letter-spacing: 0.03em; word-spacing: 0.1em; line-height: 2; }
+/* ─── Perfil cognitivo ──────────────────────────────────────────────── */
+.perfil-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.perfil-option:has(input:checked) {
+  border-color: var(--green);
+  background: var(--green-dim);
+}
+.perfil-option input[type="radio"] { accent-color: var(--green); margin-top: 3px; }
 
-@media (max-width: 640px) {
-  .grid-cards { grid-template-columns: 1fr 1fr; }
-  .nav-links { gap: 0.75rem; }
-  main { padding: 0 1rem 3rem; }
+/* ─── Streak ────────────────────────────────────────────────────────── */
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.25);
+  color: #fcd34d;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* ─── Stats grid ─────────────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stat-card .stat-value {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.stat-card .stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* ─── Acessibilidade: perfis cognitivos ─────────────────────────────── */
+body.perfil-tdah {
+  font-size: 16px;
+  line-height: 1.9;
+}
+body.perfil-dislexia {
+  letter-spacing: 0.04em;
+  word-spacing: 0.12em;
+  line-height: 1.95;
+}
+body.perfil-tea {
+  --surface: #0d0d0d;
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .page-content { padding: 16px; }
+  .topbar { padding: 12px 16px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
 }

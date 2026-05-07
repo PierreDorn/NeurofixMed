@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { GoogleLoginButton } from '@/components/AuthButton';
 
-export default function LoginPage() {
+export default function CadastroPage() {
   return (
     <div style={{
       minHeight: '100vh',
@@ -33,22 +33,22 @@ export default function LoginPage() {
         {/* Título */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#f1f5f9', marginBottom: '8px', letterSpacing: '-0.02em' }}>
-            Bem-vindo de volta
+            Criar sua conta
           </h1>
           <p style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.6', margin: 0 }}>
-            Entre com sua conta Google para continuar seus estudos.
+            Comece gratuitamente e tenha acesso ao seu plano de estudos personalizado.
           </p>
         </div>
 
         {/* Botão Google */}
         <GoogleLoginButton />
 
-        {/* Link para cadastro */}
-        <div style={{ textAlign: 'center', marginTop: '24px' }}>
+        {/* Separador */}
+        <div style={{ textAlign: 'center', margin: '24px 0 0' }}>
           <p style={{ fontSize: '13px', color: '#374151', margin: 0 }}>
-            Não tem conta?{' '}
-            <Link href="/cadastro" style={{ color: '#C9A455', fontWeight: '700', textDecoration: 'none' }}>
-              Criar conta grátis
+            Já tem conta?{' '}
+            <Link href="/login" style={{ color: '#C9A455', fontWeight: '700', textDecoration: 'none' }}>
+              Entrar
             </Link>
           </p>
         </div>
