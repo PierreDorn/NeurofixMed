@@ -8,93 +8,99 @@ async function salvarOnboarding(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const semestre       = String(formData.get('semestre') ?? '');
-  const foco           = String(formData.get('foco') ?? '');
-  const perfil         = String(formData.get('perfil_cognitivo') ?? 'padrao');
+  const semestre = String(formData.get('semestre') ?? '');
+  const foco     = String(formData.get('foco') ?? '');
+  const perfil   = String(formData.get('perfil_cognitivo') ?? 'padrao');
 
-  // Upsert no perfil do estudante
   await supabase.from('student_profiles').upsert({
-    user_id:           user.id,
+    user_id:          user.id,
     semestre,
     foco,
-    perfil_cognitivo:  perfil,
-    onboarding_done:   true,
-    updated_at:        new Date().toISOString(),
+    perfil_cognitivo: perfil,
+    onboarding_done:  true,
+    updated_at:       new Date().toISOString(),
   }, { onConflict: 'user_id' });
 
   redirect('/dashboard');
 }
 
+const focoOpcoes = [
+  { value: 'faculdade',  label: '🎓 Provas da faculdade', desc: 'Gabaritar provas semestrais e internas' },
+  { value: 'enamed',     label: '📋 ENAMED',              desc: 'Preparação para o Exame Nacional de Desempenho' },
+  { value: 'residencia', label: '🏥 Residência médica',   desc: 'Concursos de residência' },
+  { value: 'revisao',    label: '🔁 Revisão geral',       desc: 'Consolidar e não esquecer o que já estudei' },
+];
+
+const perfilOpcoes = [
+  { value: 'tdah',     label: '⚡ TDAH',         desc: 'Blocos curtos, checklist e foco no próximo passo' },
+  { value: 'tea',      label: '🔷 TEA',           desc: 'Estrutura fixa, previsibilidade e menos ambiguidade' },
+  { value: 'dislexia', label: '📖 Dislexia',      desc: 'Frases curtas, espaçamento maior e linguagem direta' },
+  { value: 'padrao',   label: '📝 Padrão',        desc: 'Explicação tradicional, sem adaptações específicas' },
+];
+
 export default function OnboardingPage() {
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background: 'var(--bg)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-      }}
-    >
-      <div style={{ width: '100%', maxWidth: '520px' }}>
+    <main style={{
+      minHeight: '100vh',
+      background: '#050505',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '32px 24px',
+      fontFamily: "'Inter', sans-serif",
+    }}>
+      <div style={{ width: '100%', maxWidth: '540px' }}>
 
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          {/* Logo */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
+        {/* ── Logo + título ── */}
+        <div style={{ textAlign: 'center', marginBottom: '44px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
             <Image
               src="/logo.png"
               alt="NeuroFix Med"
-              width={240}
-              height={72}
-              style={{ height: '64px', width: 'auto', objectFit: 'contain' }}
+              width={280}
+              height={84}
+              style={{ height: '72px', width: 'auto', objectFit: 'contain' }}
               priority
             />
           </div>
-          {/* Linha dourada decorativa */}
           <div style={{
-            width: '60px',
-            height: '2px',
+            width: '80px', height: '1px',
             background: 'linear-gradient(90deg, transparent, #C9A455, transparent)',
             margin: '0 auto 20px',
           }} />
           <h1 style={{
-            fontSize: '22px',
-            fontWeight: '700',
-            color: '#f0ede6',
-            marginBottom: '10px',
-            letterSpacing: '-0.01em',
+            fontSize: '20px', fontWeight: '700',
+            color: '#f0ede6', marginBottom: '8px', letterSpacing: '-0.01em',
           }}>
             Bem-vindo ao NeuroFix Med
           </h1>
-          <p style={{ color: '#6B9EC4', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
-            Me conta um pouco sobre você para personalizar sua experiência de estudo.
+          <p style={{ fontSize: '14px', color: '#6B9EC4', lineHeight: '1.6', margin: 0 }}>
+            Me conta um pouco sobre você para personalizar sua experiência.
           </p>
         </div>
 
-        {/* Formulário */}
-        <form action={salvarOnboarding} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* ── Formulário ── */}
+        <form action={salvarOnboarding} style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
 
           {/* Semestre */}
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: 'var(--soft)', marginBottom: '8px' }}>
-              Em qual semestre/fase você está?
+            <label style={{
+              display: 'block', fontSize: '12px', fontWeight: '700',
+              color: '#C9A455', textTransform: 'uppercase' as const,
+              letterSpacing: '0.12em', marginBottom: '10px',
+            }}>
+              Semestre / Fase
             </label>
-            <select name="semestre" required style={{ background: 'var(--bg2)' }}>
+            <select name="semestre" required style={{
+              width: '100%', background: '#111111',
+              border: '1px solid rgba(201,164,85,0.25)', borderRadius: '6px',
+              padding: '13px 16px', color: '#f0ede6', fontSize: '14px',
+              appearance: 'none' as const, outline: 'none', cursor: 'pointer',
+            }}>
               <option value="">Escolha seu semestre</option>
-              <option value="1">1º semestre</option>
-              <option value="2">2º semestre</option>
-              <option value="3">3º semestre</option>
-              <option value="4">4º semestre</option>
-              <option value="5">5º semestre</option>
-              <option value="6">6º semestre</option>
-              <option value="7">7º semestre</option>
-              <option value="8">8º semestre</option>
-              <option value="9">9º semestre</option>
-              <option value="10">10º semestre</option>
-              <option value="11">11º semestre</option>
-              <option value="12">12º semestre</option>
+              {[1,2,3,4,5,6,7,8,9,10,11,12].map(n => (
+                <option key={n} value={String(n)}>{n}º semestre</option>
+              ))}
               <option value="internato1">Internato – 1º ano</option>
               <option value="internato2">Internato – 2º ano</option>
               <option value="formado">Formado / Residência</option>
@@ -103,21 +109,27 @@ export default function OnboardingPage() {
 
           {/* Foco */}
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: 'var(--soft)', marginBottom: '8px' }}>
-              Qual é o seu principal foco agora?
+            <label style={{
+              display: 'block', fontSize: '12px', fontWeight: '700',
+              color: '#C9A455', textTransform: 'uppercase' as const,
+              letterSpacing: '0.12em', marginBottom: '10px',
+            }}>
+              Principal foco agora
             </label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {[
-                { value: 'faculdade', label: '🎓 Provas da faculdade', desc: 'Gabaritar provas semestrais e internas' },
-                { value: 'enamed',    label: '📋 ENAMED', desc: 'Preparação para o Exame Nacional de Desempenho' },
-                { value: 'residencia',label: '🏥 Residência médica', desc: 'Concursos de residência' },
-                { value: 'revisao',   label: '🔁 Revisão geral', desc: 'Consolidar e não esquecer o que já estudei' },
-              ].map(({ value, label, desc }) => (
-                <label key={value} className="perfil-option" style={{ cursor: 'pointer' }}>
-                  <input type="radio" name="foco" value={value} required />
+              {focoOpcoes.map(({ value, label, desc }) => (
+                <label key={value} style={{
+                  display: 'flex', alignItems: 'center', gap: '14px',
+                  background: '#111111', border: '1px solid #1e1e1e',
+                  borderRadius: '8px', padding: '14px 16px', cursor: 'pointer',
+                }}>
+                  <input
+                    type="radio" name="foco" value={value} required
+                    style={{ accentColor: '#C9A455', width: '16px', height: '16px', flexShrink: 0 }}
+                  />
                   <div>
-                    <div style={{ fontWeight: '700', fontSize: '14px' }}>{label}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>{desc}</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#f0ede6' }}>{label}</div>
+                    <div style={{ fontSize: '12px', color: '#5a5a5a', marginTop: '2px' }}>{desc}</div>
                   </div>
                 </label>
               ))}
@@ -126,24 +138,31 @@ export default function OnboardingPage() {
 
           {/* Perfil cognitivo */}
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: 'var(--soft)', marginBottom: '4px' }}>
+            <label style={{
+              display: 'block', fontSize: '12px', fontWeight: '700',
+              color: '#C9A455', textTransform: 'uppercase' as const,
+              letterSpacing: '0.12em', marginBottom: '4px',
+            }}>
               Como você aprende melhor?
             </label>
-            <p style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '10px', lineHeight: '1.5' }}>
-              Isso adapta a forma como os conteúdos e gabaritos são apresentados para você.
+            <p style={{ fontSize: '12px', color: '#4a4a4a', marginBottom: '10px', lineHeight: '1.5' }}>
+              Adapta a forma como os conteúdos são apresentados para você.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {[
-                { value: 'tdah',    label: '⚡ TDAH', desc: 'Blocos curtos, checklist e foco no próximo passo' },
-                { value: 'tea',     label: '🔷 Autismo / TEA', desc: 'Estrutura fixa, previsibilidade e menos ambiguidade' },
-                { value: 'dislexia',label: '📖 Dislexia', desc: 'Frases curtas, espaçamento maior e linguagem direta' },
-                { value: 'padrao',  label: '📝 Padrão', desc: 'Explicação tradicional, sem adaptações específicas' },
-              ].map(({ value, label, desc }) => (
-                <label key={value} className="perfil-option" style={{ cursor: 'pointer' }}>
-                  <input type="radio" name="perfil_cognitivo" value={value} defaultChecked={value === 'padrao'} />
+              {perfilOpcoes.map(({ value, label, desc }) => (
+                <label key={value} style={{
+                  display: 'flex', alignItems: 'center', gap: '14px',
+                  background: '#111111', border: '1px solid #1e1e1e',
+                  borderRadius: '8px', padding: '14px 16px', cursor: 'pointer',
+                }}>
+                  <input
+                    type="radio" name="perfil_cognitivo" value={value}
+                    defaultChecked={value === 'padrao'}
+                    style={{ accentColor: '#C9A455', width: '16px', height: '16px', flexShrink: 0 }}
+                  />
                   <div>
-                    <div style={{ fontWeight: '700', fontSize: '14px' }}>{label}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>{desc}</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#f0ede6' }}>{label}</div>
+                    <div style={{ fontSize: '12px', color: '#5a5a5a', marginTop: '2px' }}>{desc}</div>
                   </div>
                 </label>
               ))}
@@ -151,15 +170,17 @@ export default function OnboardingPage() {
           </div>
 
           {/* Botão */}
-          <button
-            type="submit"
-            className="btn-primary"
-            style={{ width: '100%', justifyContent: 'center', fontSize: '15px', padding: '14px' }}
-          >
+          <button type="submit" style={{
+            width: '100%', padding: '15px',
+            background: 'linear-gradient(135deg, #C9A455, #E8CA7A)',
+            border: 'none', borderRadius: '6px', cursor: 'pointer',
+            fontSize: '14px', fontWeight: '800', color: '#0a0a0a',
+            letterSpacing: '0.02em', marginTop: '4px',
+          }}>
             Começar meu plano de estudos →
           </button>
 
-          <p style={{ textAlign: 'center', fontSize: '11px', color: 'var(--muted)', lineHeight: '1.5' }}>
+          <p style={{ textAlign: 'center', fontSize: '11px', color: '#333', lineHeight: '1.5' }}>
             Você pode alterar essas informações a qualquer momento no seu perfil.
           </p>
         </form>
