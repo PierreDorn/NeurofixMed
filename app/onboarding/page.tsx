@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { createServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 
@@ -39,18 +40,35 @@ export default function OnboardingPage() {
       <div style={{ width: '100%', maxWidth: '520px' }}>
 
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
+            <Image
+              src="/logo.png"
+              alt="NeuroFix Med"
+              width={240}
+              height={72}
+              style={{ height: '64px', width: 'auto', objectFit: 'contain' }}
+              priority
+            />
+          </div>
+          {/* Linha dourada decorativa */}
           <div style={{
-            width: '56px', height: '56px', borderRadius: '16px',
-            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '28px', margin: '0 auto 16px',
-            boxShadow: '0 0 30px rgba(34,197,94,0.35)',
-          }}>🧠</div>
-          <h1 style={{ fontSize: '28px', marginBottom: '8px' }}>
+            width: '60px',
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent, #C9A455, transparent)',
+            margin: '0 auto 20px',
+          }} />
+          <h1 style={{
+            fontSize: '22px',
+            fontWeight: '700',
+            color: '#f0ede6',
+            marginBottom: '10px',
+            letterSpacing: '-0.01em',
+          }}>
             Bem-vindo ao NeuroFix Med
           </h1>
-          <p style={{ color: 'var(--soft)', fontSize: '15px', lineHeight: '1.6' }}>
+          <p style={{ color: '#6B9EC4', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
             Me conta um pouco sobre você para personalizar sua experiência de estudo.
           </p>
         </div>
