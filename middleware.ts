@@ -55,8 +55,8 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some((r) => pathname === r);
   const isPublicRoute = PUBLIC_ROUTES.some((r) => pathname === r);
 
-  // ✅ Usuário logado tentando acessar login/cadastro → manda pro dashboard
-  if (isLoggedIn && isAuthRoute) {
+  // ✅ Usuário logado tentando acessar login/cadastro/landing → manda pro dashboard
+  if (isLoggedIn && (isAuthRoute || pathname === '/')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
