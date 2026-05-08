@@ -7,15 +7,19 @@ async function salvarOnboarding(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const semestre = String(formData.get('semestre') ?? '');
-  const foco     = String(formData.get('foco') ?? '');
-  const perfil   = String(formData.get('perfil_cognitivo') ?? 'padrao');
+  const semestre        = String(formData.get('semestre') ?? '');
+  const foco            = String(formData.get('foco') ?? '');
+  const perfil          = String(formData.get('perfil_cognitivo') ?? 'padrao');
+  const nome_faculdade  = String(formData.get('nome_faculdade') ?? '');
+  const data_nascimento = String(formData.get('data_nascimento') ?? '') || null;
 
   await supabase.from('student_profiles').upsert({
     user_id:          user.id,
     semestre,
     foco,
     perfil_cognitivo: perfil,
+    nome_faculdade,
+    data_nascimento,
     onboarding_done:  true,
     updated_at:       new Date().toISOString(),
   }, { onConflict: 'user_id' });
@@ -586,6 +590,57 @@ export default function OnboardingPage() {
                     </div>
                   </label>
                 ))}
+              </div>
+
+              {/* Dados adicionais */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div className="ob-label">Informações complementares</div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', color: 'rgba(170,195,220,0.6)', marginBottom: '6px', fontWeight: '600', letterSpacing: '0.05em' }}>
+                    Data de nascimento <span style={{ color: '#C9A455' }}>*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="data_nascimento"
+                    required
+                    max={new Date(new Date().setFullYear(new Date().getFullYear() - 16)).toISOString().split('T')[0]}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      background: 'rgba(15,30,60,0.6)',
+                      border: '1px solid rgba(107,158,196,0.25)',
+                      borderRadius: '10px',
+                      color: '#c8d4e0',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box' as const,
+                      colorScheme: 'dark',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', color: 'rgba(170,195,220,0.6)', marginBottom: '6px', fontWeight: '600', letterSpacing: '0.05em' }}>
+                    Nome da faculdade <span style={{ color: 'rgba(100,130,160,0.5)', fontWeight: '400' }}>(opcional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="nome_faculdade"
+                    placeholder="Ex: USP, UFMG, PUC-SP..."
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      background: 'rgba(15,30,60,0.6)',
+                      border: '1px solid rgba(107,158,196,0.25)',
+                      borderRadius: '10px',
+                      color: '#c8d4e0',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box' as const,
+                    }}
+                  />
+                </div>
               </div>
 
               <button type="submit" className="ob-btn">Continuar →</button>
