@@ -176,14 +176,11 @@ export default function OnboardingPage() {
 
         <main className="ob-main">
           <div className="ob-logo-wrap">
-            <div className="ob-logo-box">
-              <span className="ob-logo-nf">NF</span>
-              <div className="ob-logo-sep" />
-              <div className="ob-logo-text">
-                <span className="ob-logo-neurofix">NEUROFIX</span>
-                <span className="ob-logo-med">— MED —</span>
-              </div>
-            </div>
+            <img
+              src="/neurofix-logo.png"
+              alt="NeuroFix Med"
+              style={{ height: '64px', mixBlendMode: 'screen' as const, display: 'block' }}
+            />
           </div>
 
           <div className="ob-heading">
@@ -211,7 +208,7 @@ export default function OnboardingPage() {
               <span className="ob-field-label">Principal foco agora</span>
               <FocoSelector />
 
-              <button type="submit" className="ob-btn">Continuar →</button>
+              <button type="submit" className="ob-btn">Prosseguir para o NeuroFix Med →</button>
               <div className="ob-progress">
                 <div className="ob-prog active" />
                 <div className="ob-prog" />

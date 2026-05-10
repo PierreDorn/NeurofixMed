@@ -14,11 +14,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('user_id', user.id)
     .single();
 
-  // Se não tem perfil ou não fez onboarding ainda, redireciona
-  if (!profile || !profile.onboarding_done) {
-    redirect('/onboarding');
-  }
-
   // Classe de acessibilidade no body baseada no perfil cognitivo
   const perfilClass = profile?.perfil_cognitivo
     ? `perfil-${profile.perfil_cognitivo}`

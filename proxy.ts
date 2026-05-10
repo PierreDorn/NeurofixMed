@@ -2,11 +2,9 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const AUTH_ROUTES = ['/login', '/cadastro'];
+const PUBLIC_ROUTES = ['/', '/login', '/cadastro', '/auth/callback', '/termos-de-uso', '/politica-de-privacidade'];
 
-const PUBLIC_ROUTES = ['/', '/auth/callback', '/termos-de-uso', '/politica-de-privacidade'];
-
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
@@ -47,14 +45,9 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isLoggedIn = !!user;
-  const isAuthRoute = AUTH_ROUTES.some((r) => pathname === r);
   const isPublicRoute = PUBLIC_ROUTES.some((r) => pathname === r);
 
-  if (isLoggedIn && (isAuthRoute || pathname === '/')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
-  if (!isLoggedIn && !isAuthRoute && !isPublicRoute) {
+  if (!isLoggedIn && !isPublicRoute) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

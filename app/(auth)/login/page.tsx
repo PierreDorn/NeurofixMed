@@ -83,9 +83,10 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     const supabase = createSupabaseBrowserClient();
+    const next = tab === 'cadastro' ? '/onboarding' : '/dashboard';
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${location.origin}/auth/callback` },
+      options: { redirectTo: `${location.origin}/auth/callback?next=${next}` },
     });
   }
 
@@ -268,31 +269,11 @@ export default function LoginPage() {
 
           {/* Logo */}
           <div className="nf-logo-area">
-            <svg width="290" height="60" viewBox="0 0 640 136" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8B6914"/><stop offset="40%" stopColor="#E8D08A"/><stop offset="100%" stopColor="#C9A84C"/>
-                </linearGradient>
-                <linearGradient id="fx1" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#C9A84C"/><stop offset="100%" stopColor="#4A90C4"/>
-                </linearGradient>
-                <linearGradient id="md1" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#6FB8E8"/><stop offset="100%" stopColor="#4A90C4"/>
-                </linearGradient>
-              </defs>
-              <line x1="18" y1="18" x2="18" y2="98" stroke="url(#lg1)" strokeWidth="4.5" strokeLinecap="square"/>
-              <line x1="18" y1="18" x2="72" y2="98" stroke="url(#lg1)" strokeWidth="4.5" strokeLinecap="square"/>
-              <line x1="72" y1="18" x2="72" y2="98" stroke="url(#lg1)" strokeWidth="4.5" strokeLinecap="square"/>
-              <line x1="86" y1="18" x2="86" y2="98" stroke="url(#lg1)" strokeWidth="4.5" strokeLinecap="square"/>
-              <line x1="86" y1="18" x2="130" y2="18" stroke="url(#lg1)" strokeWidth="4.5" strokeLinecap="square"/>
-              <line x1="86" y1="57" x2="120" y2="57" stroke="url(#lg1)" strokeWidth="4.5" strokeLinecap="square"/>
-              <line x1="152" y1="12" x2="152" y2="124" stroke="url(#lg1)" strokeWidth="2" opacity=".72"/>
-              <text x="172" y="80" fontFamily="'Raleway',sans-serif" fontWeight="300" fontSize="62" letterSpacing="6" fill="url(#lg1)">NEURO</text>
-              <text x="448" y="80" fontFamily="'Raleway',sans-serif" fontWeight="300" fontSize="62" letterSpacing="6" fill="url(#fx1)">FIX</text>
-              <line x1="172" y1="105" x2="295" y2="105" stroke="url(#lg1)" strokeWidth="1.5" opacity=".62"/>
-              <text x="310" y="118" fontFamily="'Raleway',sans-serif" fontWeight="300" fontSize="28" letterSpacing="10" textAnchor="middle" fill="url(#md1)">MED</text>
-              <line x1="348" y1="105" x2="620" y2="105" stroke="url(#lg1)" strokeWidth="1.5" opacity=".62"/>
-            </svg>
+            <img
+              src="/neurofix-logo.png"
+              alt="NeuroFix Med"
+              style={{ height: '68px', display: 'block' }}
+            />
           </div>
 
           {/* Copy */}
@@ -356,25 +337,11 @@ export default function LoginPage() {
 
             {/* Mini logo */}
             <div className="nf-card-logo">
-              <svg width="185" height="40" viewBox="0 0 640 136" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#8B6914"/><stop offset="40%" stopColor="#E8D08A"/><stop offset="100%" stopColor="#C9A84C"/></linearGradient>
-                  <linearGradient id="fx2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#C9A84C"/><stop offset="100%" stopColor="#4A90C4"/></linearGradient>
-                  <linearGradient id="md2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#6FB8E8"/><stop offset="100%" stopColor="#4A90C4"/></linearGradient>
-                </defs>
-                <line x1="18" y1="18" x2="18" y2="98" stroke="url(#lg2)" strokeWidth="4.5" strokeLinecap="square"/>
-                <line x1="18" y1="18" x2="72" y2="98" stroke="url(#lg2)" strokeWidth="4.5" strokeLinecap="square"/>
-                <line x1="72" y1="18" x2="72" y2="98" stroke="url(#lg2)" strokeWidth="4.5" strokeLinecap="square"/>
-                <line x1="86" y1="18" x2="86" y2="98" stroke="url(#lg2)" strokeWidth="4.5" strokeLinecap="square"/>
-                <line x1="86" y1="18" x2="130" y2="18" stroke="url(#lg2)" strokeWidth="4.5" strokeLinecap="square"/>
-                <line x1="86" y1="57" x2="120" y2="57" stroke="url(#lg2)" strokeWidth="4.5" strokeLinecap="square"/>
-                <line x1="152" y1="12" x2="152" y2="124" stroke="url(#lg2)" strokeWidth="2" opacity=".7"/>
-                <text x="172" y="80" fontFamily="'Raleway',sans-serif" fontWeight="300" fontSize="62" letterSpacing="6" fill="url(#lg2)">NEURO</text>
-                <text x="448" y="80" fontFamily="'Raleway',sans-serif" fontWeight="300" fontSize="62" letterSpacing="6" fill="url(#fx2)">FIX</text>
-                <line x1="172" y1="105" x2="295" y2="105" stroke="url(#lg2)" strokeWidth="1.5" opacity=".6"/>
-                <text x="310" y="118" fontFamily="'Raleway',sans-serif" fontWeight="300" fontSize="28" letterSpacing="10" textAnchor="middle" fill="url(#md2)">MED</text>
-                <line x1="348" y1="105" x2="620" y2="105" stroke="url(#lg2)" strokeWidth="1.5" opacity=".6"/>
-              </svg>
+              <img
+                src="/neurofix-logo.png"
+                alt="NeuroFix Med"
+                style={{ height: '44px', display: 'block' }}
+              />
             </div>
 
             <h2 className="nf-f-head">
