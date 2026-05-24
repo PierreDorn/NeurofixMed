@@ -7,8 +7,12 @@ export default async function EditarResumoPage({ params }: { params: Promise<{ i
   const supabase = await createServerClient();
 
   const [{ data: resumo }, { data: materiais }] = await Promise.all([
-    supabase.from('study_summaries').select('id, titulo, content_html, content_type, pdf_url, pdf_filename, pdf_size, status, ciclo, materia, topico').eq('id', id).single(),
-    supabase.from('materiais').select('id, nome').eq('ativo', true).order('ordem'),
+    supabase
+      .from('study_summaries')
+      .select('id, titulo, content_html, content_type, pdf_url, pdf_filename, pdf_size, status, ciclo, materia, topico, topic_id, subtopic_id')
+      .eq('id', id)
+      .single(),
+    supabase.from('materiais').select('id, nome, ciclo').eq('ativo', true).order('ordem'),
   ]);
 
   if (!resumo) notFound();
@@ -28,6 +32,8 @@ export default async function EditarResumoPage({ params }: { params: Promise<{ i
         ciclo: resumo.ciclo ?? '',
         materia: resumo.materia ?? '',
         topico: resumo.topico ?? '',
+        topic_id: resumo.topic_id ?? '',
+        subtopic_id: resumo.subtopic_id ?? '',
       }}
     />
   );

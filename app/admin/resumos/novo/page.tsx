@@ -3,7 +3,7 @@ import AdminResumoForm from '@/components/admin/AdminResumoForm';
 
 export default async function NovoResumoPage() {
   const supabase = await createServerClient();
-  const { data: materiais } = await supabase.from('materiais').select('id, nome').eq('ativo', true).order('ordem');
+  const { data: materiais } = await supabase.from('materiais').select('id, nome, ciclo').eq('ativo', true).order('ordem');
 
   return <AdminResumoForm materiais={materiais ?? []} />;
 }

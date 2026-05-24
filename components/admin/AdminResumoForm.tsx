@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
@@ -16,9 +16,12 @@ function slugify(str: string) {
     .replace(/^_|_$/g, '');
 }
 
-interface Material { id: string; nome: string; }
+interface Material { id: string; nome: string; ciclo: string | null; }
+interface Topico { id: string; nome: string; order_index: number; }
+interface Subtopic { id: string; nome: string; ordem: number; }
 interface PDFFile { file: File; name: string; size: string; objectURL: string; }
 interface ImgItem { name: string; size: string; dataUrl: string; file: File; }
+
 interface InitialData {
   id?: string;
   titulo?: string;
@@ -31,6 +34,8 @@ interface InitialData {
   ciclo?: string;
   materia?: string;
   topico?: string;
+  topic_id?: string;
+  subtopic_id?: string;
 }
 
 interface Props {
@@ -38,7 +43,7 @@ interface Props {
   initial?: InitialData;
 }
 
-const CICLOS = ['Ciclo Básico', 'Ciclo Clínico'];
+const CICLOS = ['Ciclo Básico', 'Ciclo Clínico', 'Internato'];
 
 function Toast({ msg, visible }: { msg: string; visible: boolean }) {
   return (
@@ -63,13 +68,47 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
   const [tipo, setTipo] = useState<'texto' | 'pdf'>((initial?.content_type as 'texto' | 'pdf') ?? 'texto');
   const [htmlContent, setHtmlContent] = useState(initial?.content_html ?? '<p>Comece a escrever aqui...</p>');
   const [pdfFile, setPdfFile] = useState<PDFFile | null>(null);
-  const [ciclo, setCiclo] = useState(initial?.ciclo ?? '');
-  const [materia, setMateria] = useState(initial?.materia ?? '');
-  const [topico, setTopico] = useState(initial?.topico ?? '');
   const [status, setStatus] = useState(initial?.status ?? 'draft');
   const [imgList, setImgList] = useState<ImgItem[]>([]);
   const [toast, setToast] = useState({ visible: false, msg: '' });
   const [saving, setSaving] = useState(false);
+
+  // Hierarquia cascading
+  const [ciclo, setCiclo] = useState(initial?.ciclo ?? '');
+  const [materiaId, setMateriaId] = useState(() =>
+    initial?.materia
+      ? (materiais.find(m => m.nome === initial.materia)?.id ?? '')
+      : ''
+  );
+  const [materiaNome, setMateriaNome] = useState(initial?.materia ?? '');
+
+  const [topicos, setTopicos] = useState<Topico[]>([]);
+  const [topicId, setTopicId] = useState(initial?.topic_id ?? '');
+  const [topicNome, setTopicNome] = useState(initial?.topico ?? '');
+  const [criarTopico, setCriarTopico] = useState(false);
+
+  const [subtopics, setSubtopics] = useState<Subtopic[]>([]);
+  const [subtopicId, setSubtopicId] = useState(initial?.subtopic_id ?? '');
+  const [subtopicNome, setSubtopicNome] = useState('');
+  const [criarSubtopic, setCriarSubtopic] = useState(false);
+  const [subtopicOrdem, setSubtopicOrdem] = useState(1);
+
+  // Carregar tópicos quando matéria muda
+  useEffect(() => {
+    if (!materiaId) { setTopicos([]); setTopicId(''); return; }
+    supabase.from('topics').select('id, nome, order_index').eq('material_id', materiaId).order('order_index')
+      .then(({ data }) => setTopicos(data ?? []));
+  }, [materiaId]);
+
+  // Carregar capítulos quando tópico muda
+  useEffect(() => {
+    if (!topicId || criarTopico) { setSubtopics([]); return; }
+    supabase.from('subtopics').select('id, nome, ordem').eq('topic_id', topicId).order('ordem')
+      .then(({ data }) => {
+        setSubtopics(data ?? []);
+        if (data && data.length > 0) setSubtopicOrdem(data.length + 1);
+      });
+  }, [topicId, criarTopico]);
 
   function showToast(msg: string) {
     setToast({ visible: true, msg });
@@ -110,14 +149,52 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
 
   async function save(targetStatus: 'draft' | 'published') {
     if (!titulo.trim()) { showToast('Digite o título do resumo!'); return; }
+    if (!materiaId) { showToast('Selecione a matéria!'); return; }
     setSaving(true);
     try {
-      let payload: Record<string, unknown> = { titulo, ciclo, materia, topico, status: targetStatus, updated_at: new Date().toISOString(), content: '' };
+      // 1. Resolver tópico (criar se necessário)
+      let finalTopicId = topicId;
+      let finalTopicNome = topicos.find(t => t.id === topicId)?.nome ?? topicNome;
+      if (criarTopico && topicNome.trim()) {
+        const { data, error } = await supabase
+          .from('topics')
+          .insert({ nome: topicNome.trim(), material_id: materiaId, order_index: 0 })
+          .select('id').single();
+        if (error) throw error;
+        finalTopicId = data.id;
+        finalTopicNome = topicNome.trim();
+      }
+
+      // 2. Resolver capítulo (criar se necessário)
+      let finalSubtopicId = subtopicId;
+      let finalSubtopicNome = subtopics.find(s => s.id === subtopicId)?.nome ?? subtopicNome;
+      if (criarSubtopic && subtopicNome.trim() && finalTopicId) {
+        await supabase.rpc('reorder_subtopics', { p_topic_id: finalTopicId, p_position: subtopicOrdem });
+        const { data, error } = await supabase
+          .from('subtopics')
+          .insert({ nome: subtopicNome.trim(), topic_id: finalTopicId, ordem: subtopicOrdem })
+          .select('id').single();
+        if (error) throw error;
+        finalSubtopicId = data.id;
+        finalSubtopicNome = subtopicNome.trim();
+      }
+
+      let payload: Record<string, unknown> = {
+        titulo,
+        ciclo,
+        materia: materiaNome,
+        topico: finalTopicNome,
+        topic_id: finalTopicId || null,
+        subtopic_id: finalSubtopicId || null,
+        status: targetStatus,
+        updated_at: new Date().toISOString(),
+        content: '',
+      };
 
       if (tipo === 'pdf') {
         if (!pdfFile && !initial?.pdf_url) { showToast('Selecione um PDF!'); setSaving(false); return; }
         if (pdfFile) {
-          const path = `${slugify(ciclo || 'geral')}/${slugify(materia || 'geral')}/${Date.now()}_${slugify(pdfFile.name)}`;
+          const path = `${slugify(ciclo || 'geral')}/${slugify(materiaNome || 'geral')}/${Date.now()}_${slugify(pdfFile.name)}`;
           const { data, error } = await supabase.storage.from('resumos-pdf').upload(path, pdfFile.file, { upsert: true });
           if (error) throw error;
           const { data: { publicUrl } } = supabase.storage.from('resumos-pdf').getPublicUrl(data.path);
@@ -149,6 +226,8 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
       setSaving(false);
     }
   }
+
+  const materiasFiltradas = ciclo ? materiais.filter(m => m.ciclo === ciclo) : [];
 
   return (
     <>
@@ -196,6 +275,9 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
         .adm-pdf-preview-name{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text)}
         .adm-pdf-badge{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.25);font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.5px}
         .adm-pdf-student-note{margin-top:10px;padding:10px 14px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--radius-sm);font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px}
+        .adm-cascading-row{display:flex;gap:6px;align-items:stretch}
+        .adm-cascading-row .adm-select{flex:1}
+        .adm-hint{font-size:11px;color:var(--text-muted);margin-top:4px}
         @media(max-width:900px){.adm-editor-layout{grid-template-columns:1fr}}
       `}} />
 
@@ -222,7 +304,7 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
                 style={{ fontSize: '15px', fontWeight: 600 }}
                 value={titulo}
                 onChange={e => setTitulo(e.target.value)}
-                placeholder="Ex: Clínica Médica — Neurologia — Hidrocefalia"
+                placeholder="Ex: Anti-hipertensivos — Mecanismo de Ação"
               />
             </div>
           </div>
@@ -256,27 +338,113 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
         {/* COLUNA LATERAL */}
         <div>
           <div className="adm-editor-card">
-            <div className="adm-editor-card-header">⚙️ Configurações</div>
+            <div className="adm-editor-card-header">⚙️ Localização</div>
             <div className="adm-editor-card-body">
+
+              {/* CICLO */}
               <div className="adm-form-group">
                 <label className="adm-label">Ciclo</label>
-                <select className="adm-select" value={ciclo} onChange={e => setCiclo(e.target.value)}>
+                <select className="adm-select" value={ciclo} onChange={e => {
+                  setCiclo(e.target.value);
+                  setMateriaId(''); setMateriaNome('');
+                  setTopicId(''); setTopicNome(''); setCriarTopico(false);
+                  setSubtopicId(''); setSubtopicNome(''); setCriarSubtopic(false);
+                }}>
                   <option value="">Selecione...</option>
                   {CICLOS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
-              <div className="adm-form-group">
-                <label className="adm-label">Matéria</label>
-                <select className="adm-select" value={materia} onChange={e => setMateria(e.target.value)}>
-                  <option value="">Selecione...</option>
-                  {materiais.map(m => <option key={m.id} value={m.nome}>{m.nome}</option>)}
-                </select>
-              </div>
-              <div className="adm-form-group">
-                <label className="adm-label">Tópico</label>
-                <input className="adm-input" value={topico} onChange={e => setTopico(e.target.value)} placeholder="Ex: Doenças do SNC" />
-              </div>
-              <div className="adm-form-group">
+
+              {/* MATÉRIA */}
+              {ciclo && (
+                <div className="adm-form-group">
+                  <label className="adm-label">Matéria</label>
+                  <select className="adm-select" value={materiaId} onChange={e => {
+                    const m = materiais.find(x => x.id === e.target.value);
+                    setMateriaId(e.target.value);
+                    setMateriaNome(m?.nome ?? '');
+                    setTopicId(''); setTopicNome(''); setCriarTopico(false);
+                    setSubtopicId(''); setSubtopicNome(''); setCriarSubtopic(false);
+                  }}>
+                    <option value="">Selecione...</option>
+                    {materiasFiltradas.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                  </select>
+                  {materiasFiltradas.length === 0 && (
+                    <p className="adm-hint">Nenhuma matéria cadastrada para este ciclo.</p>
+                  )}
+                </div>
+              )}
+
+              {/* TÓPICO */}
+              {materiaId && (
+                <div className="adm-form-group">
+                  <label className="adm-label">Tópico</label>
+                  {!criarTopico ? (
+                    <div className="adm-cascading-row">
+                      <select className="adm-select" value={topicId} onChange={e => {
+                        setTopicId(e.target.value);
+                        setSubtopicId(''); setSubtopicNome(''); setCriarSubtopic(false);
+                      }}>
+                        <option value="">Selecione...</option>
+                        {topicos.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
+                      </select>
+                      <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                        style={{ whiteSpace: 'nowrap', padding: '0 10px' }}
+                        onClick={() => { setCriarTopico(true); setTopicId(''); setTopicNome(''); }}>
+                        + Novo
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="adm-cascading-row">
+                      <input className="adm-input" value={topicNome} onChange={e => setTopicNome(e.target.value)} placeholder="Nome do novo tópico" autoFocus />
+                      <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                        style={{ padding: '0 10px' }}
+                        onClick={() => { setCriarTopico(false); setTopicNome(''); }}>✕</button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* CAPÍTULO */}
+              {materiaId && (topicId || criarTopico) && (
+                <div className="adm-form-group">
+                  <label className="adm-label">Capítulo</label>
+                  {!criarSubtopic ? (
+                    <div className="adm-cascading-row">
+                      <select className="adm-select" value={subtopicId} onChange={e => setSubtopicId(e.target.value)}>
+                        <option value="">Selecione...</option>
+                        {subtopics.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                      </select>
+                      <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                        style={{ whiteSpace: 'nowrap', padding: '0 10px' }}
+                        onClick={() => { setCriarSubtopic(true); setSubtopicId(''); setSubtopicNome(''); }}>
+                        + Novo
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="adm-cascading-row" style={{ marginBottom: '6px' }}>
+                        <input className="adm-input" value={subtopicNome} onChange={e => setSubtopicNome(e.target.value)} placeholder="Nome do capítulo" autoFocus />
+                        <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                          style={{ padding: '0 10px' }}
+                          onClick={() => { setCriarSubtopic(false); setSubtopicNome(''); }}>✕</button>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <label className="adm-label" style={{ margin: 0, whiteSpace: 'nowrap' }}>Ordem:</label>
+                        <input className="adm-input" type="number" min="1" value={subtopicOrdem}
+                          onChange={e => setSubtopicOrdem(parseInt(e.target.value) || 1)}
+                          style={{ width: '70px' }} />
+                        <span className="adm-hint" style={{ margin: 0 }}>
+                          {subtopics.length > 0 ? `(${subtopics.length} existentes)` : '(primeiro)'}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* STATUS */}
+              <div className="adm-form-group" style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid var(--border)' }}>
                 <label className="adm-label">Status</label>
                 <select className="adm-select" value={status} onChange={e => setStatus(e.target.value)}>
                   <option value="draft">📝 Rascunho</option>
@@ -310,7 +478,8 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
                   ))
                 )}
               </div>
-              <input ref={imgInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => { if (e.target.files?.length) { addImages(e.target.files); e.target.value = ''; } }} />
+              <input ref={imgInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
+                onChange={e => { if (e.target.files?.length) { addImages(e.target.files); e.target.value = ''; } }} />
             </div>
           </div>
 
