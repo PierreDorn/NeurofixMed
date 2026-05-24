@@ -1,76 +1,71 @@
+import { createServerClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 
-const ciclos = [
-  {
-    id: 'basico',
-    nome: 'Ciclo Básico',
-    descricao: 'Anatomia, Fisiologia, Farmacologia e mais',
-    icone: '🔬',
-    disponivel: true,
-    href: '/biblioteca/basico',
-    badge: null,
-  },
-  {
-    id: 'clinico',
-    nome: 'Ciclo Clínico',
-    descricao: 'Clínica Médica, Cirurgia, Pediatria e mais',
-    icone: '🩺',
-    disponivel: false,
-    href: null,
-    badge: 'Lançamento previsto para 2027',
-  },
-  {
-    id: 'internato',
-    nome: 'Internato',
-    descricao: 'Rotações clínicas e conteúdo avançado',
-    icone: '🏥',
-    disponivel: false,
-    href: null,
-    badge: 'Lançamento previsto para 2029',
-  },
-];
+export const dynamic = 'force-dynamic';
 
-export default function BibliotecaPage() {
+type StudySummary = { id: string; status: string | null };
+type Subtopic = { study_summaries: StudySummary[] };
+type Topic = { subtopics: Subtopic[] };
+type Materia = { id: string; nome: string; icone_url: string | null; topics: Topic[] };
+
+export default async function BibliotecaPage() {
+  const supabase = await createServerClient();
+
+  const { data } = await supabase
+    .from('materiais')
+    .select(`
+      id, nome, icone_url,
+      topics(
+        subtopics(
+          study_summaries!subtopic_id(id, status)
+        )
+      )
+    `)
+    .eq('ciclo', 'Ciclo Básico')
+    .eq('ativo', true)
+    .order('ordem');
+
+  const materiais = (data ?? []) as unknown as Materia[];
+
   return (
-    <main className="mx-auto max-w-5xl p-6">
-      <h1 className="text-3xl font-bold">Biblioteca médica</h1>
+    <main className="mx-auto max-w-6xl p-6">
+      <h1 className="text-3xl font-bold">Resumos por disciplina</h1>
       <p className="mt-2 text-slate-600">
-        Selecione o ciclo para acessar os resumos e materiais de estudo.
+        Selecione uma matéria para estudar os tópicos e capítulos.
       </p>
 
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {ciclos.map(ciclo => {
-          const inner = (
-            <div
-              className={`card p-6 h-full flex flex-col gap-4 transition-all ${
-                ciclo.disponivel
-                  ? 'hover:border-blue-400 hover:shadow-md cursor-pointer'
-                  : 'opacity-60 cursor-not-allowed'
-              }`}
-            >
-              <div className="text-4xl">{ciclo.icone}</div>
-              <div>
-                <h2 className="text-xl font-bold text-slate-800">{ciclo.nome}</h2>
-                <p className="mt-1 text-sm text-slate-500">{ciclo.descricao}</p>
-              </div>
-              {ciclo.badge ? (
-                <span className="mt-auto inline-block text-xs font-medium bg-slate-100 text-slate-500 px-3 py-1 rounded-full w-fit">
-                  {ciclo.badge}
-                </span>
-              ) : (
-                <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-blue-600">
-                  Acessar →
-                </span>
-              )}
-            </div>
-          );
+      <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {materiais.map(m => {
+          const totalResumos = (m.topics ?? []).flatMap(t =>
+            (t.subtopics ?? []).flatMap(s =>
+              (s.study_summaries ?? []).filter(r => r.status === 'published')
+            )
+          ).length;
 
-          return ciclo.href ? (
-            <Link key={ciclo.id} href={ciclo.href} className="block h-full">
-              {inner}
+          return (
+            <Link key={m.id} href={`/biblioteca/${m.id}`}>
+              <div className="card overflow-hidden hover:border-blue-400 hover:shadow-md transition-all cursor-pointer group">
+                <div className="h-32 bg-slate-50 flex items-center justify-center border-b border-slate-100">
+                  {m.icone_url ? (
+                    <img
+                      src={m.icone_url}
+                      alt={m.nome}
+                      className="h-24 object-contain opacity-60 group-hover:opacity-80 transition-opacity"
+                    />
+                  ) : (
+                    <span className="text-5xl opacity-25 group-hover:opacity-40 transition-opacity">📚</span>
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-slate-800 text-sm">{m.nome}</h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {totalResumos > 0
+                      ? `${totalResumos} resumo${totalResumos > 1 ? 's' : ''} disponíve${totalResumos > 1 ? 'is' : 'l'}`
+                      : 'Em breve'}
+                  </p>
+                </div>
+              </div>
             </Link>
-          ) : (
-            <div key={ciclo.id}>{inner}</div>
           );
         })}
       </div>

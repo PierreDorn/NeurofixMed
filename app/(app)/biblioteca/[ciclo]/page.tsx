@@ -1,138 +1,122 @@
 import { createServerClient } from '@/lib/supabase-server';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import BibliotecaAccordion from '@/components/BibliotecaAccordion';
 
 export const dynamic = 'force-dynamic';
 
-const cicloMap: Record<string, string> = {
-  basico: 'Ciclo Básico',
-  clinico: 'Ciclo Clínico',
-  internato: 'Internato',
+type Topic = {
+  id: string;
+  nome: string;
+  order_index: number;
+  subtopics: {
+    id: string;
+    nome: string;
+    ordem: number;
+    study_summaries: { id: string; titulo: string | null; status: string | null }[];
+  }[];
 };
 
-type Resumo = { id: string; titulo: string | null; status: string | null };
-type Subtopic = { id: string; nome: string; ordem: number; study_summaries: Resumo[] };
-type Topic = { id: string; nome: string; order_index: number; subtopics: Subtopic[] };
-type Materia = { id: string; nome: string; topics: Topic[] };
+type Sugestao = { id: string; titulo: string | null; materia: string | null };
 
-export default async function BibliotecaCicloPage({
+export default async function BibliotecaMateriaPage({
   params,
 }: {
   params: Promise<{ ciclo: string }>;
 }) {
-  const { ciclo: cicloSlug } = await params;
-  const cicloNome = cicloMap[cicloSlug];
-  if (!cicloNome) notFound();
-
-  if (cicloSlug !== 'basico') {
-    return (
-      <main className="mx-auto max-w-5xl p-6">
-        <Link href="/biblioteca" className="text-sm text-slate-500 hover:text-blue-600">← Biblioteca</Link>
-        <div className="mt-12 text-center">
-          <div className="text-5xl mb-4">🔒</div>
-          <h1 className="text-2xl font-bold text-slate-700">{cicloNome}</h1>
-          <p className="mt-2 text-slate-500">
-            {cicloSlug === 'clinico' ? 'Lançamento previsto para 2027.' : 'Lançamento previsto para 2029.'}
-          </p>
-          <Link href="/biblioteca" className="mt-6 inline-block text-blue-600 font-semibold hover:underline">
-            ← Voltar para a Biblioteca
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
+  // O parâmetro [ciclo] é reutilizado como materiaId (UUID)
+  const { ciclo: materiaId } = await params;
   const supabase = await createServerClient();
 
-  const { data } = await supabase
-    .from('materiais')
-    .select(`
-      id, nome,
-      topics (
+  const [{ data: materia }, { data: topicsData }, { data: sugestoesData }] = await Promise.all([
+    supabase
+      .from('materiais')
+      .select('id, nome, ciclo')
+      .eq('id', materiaId)
+      .single(),
+    supabase
+      .from('topics')
+      .select(`
         id, nome, order_index,
         subtopics (
           id, nome, ordem,
           study_summaries!subtopic_id ( id, titulo, status )
         )
-      )
-    `)
-    .eq('ciclo', cicloNome)
-    .eq('ativo', true)
-    .order('ordem');
+      `)
+      .eq('material_id', materiaId)
+      .order('order_index'),
+    supabase
+      .from('study_summaries')
+      .select('id, titulo, materia')
+      .eq('status', 'published')
+      .order('updated_at', { ascending: false })
+      .limit(6),
+  ]);
 
-  const materiais = (data ?? []) as unknown as Materia[];
+  if (!materia) notFound();
+
+  const topics = (topicsData ?? []) as unknown as Topic[];
+  const sugestoes = (sugestoesData ?? []) as Sugestao[];
 
   return (
-    <main className="mx-auto max-w-5xl p-6">
+    <main className="mx-auto max-w-6xl p-6">
+      {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-        <Link href="/biblioteca" className="hover:text-blue-600">Biblioteca</Link>
-        <span>›</span>
-        <span className="text-slate-700 font-medium">{cicloNome}</span>
+        <Link href="/biblioteca" className="hover:text-blue-600 transition-colors">
+          Biblioteca
+        </Link>
+        <span className="text-slate-300">›</span>
+        <span className="text-slate-700 font-medium">{materia.nome}</span>
       </div>
 
-      <h1 className="text-3xl font-bold">{cicloNome}</h1>
-      <p className="mt-2 text-slate-600">Selecione a matéria para explorar os tópicos e capítulos.</p>
+      <h1 className="text-2xl font-bold text-slate-800 mb-6">
+        Resumos de {materia.nome}
+      </h1>
 
-      <div className="mt-6 space-y-5">
-        {materiais.map(m => {
-          // Filtrar apenas tópicos com ao menos 1 resumo publicado
-          const topicsVisiveis = (m.topics ?? [])
-            .map(t => ({
-              ...t,
-              subtopics: (t.subtopics ?? [])
-                .map(s => ({
-                  ...s,
-                  study_summaries: (s.study_summaries ?? []).filter(r => r.status === 'published'),
-                }))
-                .filter(s => s.study_summaries.length > 0),
-            }))
-            .filter(t => t.subtopics.length > 0)
-            .sort((a, b) => a.order_index - b.order_index);
+      <div className="flex gap-6 items-start">
+        {/* Accordion de tópicos */}
+        <div className="flex-1 min-w-0">
+          <BibliotecaAccordion
+            topics={topics}
+            materiaNome={materia.nome}
+          />
+        </div>
 
-          return (
-            <article key={m.id} className="card p-5">
-              <h2 className="text-xl font-bold text-slate-800 mb-3">{m.nome}</h2>
+        {/* Painel lateral — sugestões */}
+        <aside className="w-72 shrink-0 hidden lg:block">
+          <div className="card p-4">
+            <h3 className="font-bold text-slate-800 text-sm mb-1">Por onde começar?</h3>
+            <p className="text-xs text-slate-500 mb-4">
+              O NeurofixMed separou alguns resumos para você
+            </p>
 
-              {topicsVisiveis.length === 0 ? (
-                <p className="text-sm text-slate-400 italic">Nenhum resumo disponível ainda. Em breve!</p>
+            <div>
+              {sugestoes.length === 0 ? (
+                <p className="text-sm text-slate-400 text-center py-4">
+                  Nenhum resumo publicado ainda.
+                </p>
               ) : (
-                <div className="space-y-3">
-                  {topicsVisiveis.map(t => (
-                    <div key={t.id}>
-                      <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500 mb-2">
-                        {t.nome}
-                      </h3>
-                      <div className="space-y-1 ml-2">
-                        {t.subtopics
-                          .sort((a, b) => a.ordem - b.ordem)
-                          .map(s => (
-                            <div key={s.id} className="space-y-1">
-                              {s.study_summaries.map(r => (
-                                <Link
-                                  key={r.id}
-                                  href={`/resumos/${r.id}`}
-                                  className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50 transition-all group"
-                                >
-                                  <span className="text-slate-400 text-sm w-4 shrink-0">{s.ordem}.</span>
-                                  <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-slate-800 truncate group-hover:text-blue-700">
-                                      {r.titulo ?? 'Resumo sem título'}
-                                    </p>
-                                    <p className="text-xs text-slate-400">{s.nome}</p>
-                                  </div>
-                                  <span className="ml-auto text-slate-300 group-hover:text-blue-500 shrink-0">→</span>
-                                </Link>
-                              ))}
-                            </div>
-                          ))}
-                      </div>
+                sugestoes.map(s => (
+                  <Link
+                    key={s.id}
+                    href={`/resumos/${s.id}`}
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors group border-b border-slate-100 last:border-0"
+                  >
+                    <div className="min-w-0 flex-1">
+                      {s.materia && (
+                        <span className="text-xs text-slate-400 block truncate">{s.materia}</span>
+                      )}
+                      <p className="text-sm font-medium text-slate-700 group-hover:text-blue-600 truncate">
+                        {s.titulo ?? 'Resumo sem título'}
+                      </p>
                     </div>
-                  ))}
-                </div>
+                    <span className="text-slate-300 group-hover:text-blue-400 ml-2 shrink-0">→</span>
+                  </Link>
+                ))
               )}
-            </article>
-          );
-        })}
+            </div>
+          </div>
+        </aside>
       </div>
     </main>
   );
