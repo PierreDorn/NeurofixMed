@@ -2,13 +2,15 @@ import { createServerClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 const cicloMap: Record<string, string> = {
   basico: 'Ciclo Básico',
   clinico: 'Ciclo Clínico',
   internato: 'Internato',
 };
 
-type Resumo = { id: string; titulo: string | null };
+type Resumo = { id: string; titulo: string | null; status: string | null };
 type Subtopic = { id: string; nome: string; ordem: number; study_summaries: Resumo[] };
 type Topic = { id: string; nome: string; order_index: number; subtopics: Subtopic[] };
 type Materia = { id: string; nome: string; topics: Topic[] };
@@ -22,7 +24,6 @@ export default async function BibliotecaCicloPage({
   const cicloNome = cicloMap[cicloSlug];
   if (!cicloNome) notFound();
 
-  // Ciclos não disponíveis
   if (cicloSlug !== 'basico') {
     return (
       <main className="mx-auto max-w-5xl p-6">
@@ -51,7 +52,7 @@ export default async function BibliotecaCicloPage({
         id, nome, order_index,
         subtopics (
           id, nome, ordem,
-          study_summaries!subtopic_id ( id, titulo )
+          study_summaries!subtopic_id ( id, titulo, status )
         )
       )
     `)
@@ -60,12 +61,6 @@ export default async function BibliotecaCicloPage({
     .order('ordem');
 
   const materiais = (data ?? []) as unknown as Materia[];
-
-  // Filtrar somente matérias que tenham ao menos um resumo publicado
-  // (não temos acesso ao status aqui, mas exibimos todos linkados — o viewer filtra status)
-  const materiaisComConteudo = materiais.filter(m =>
-    m.topics?.some(t => t.subtopics?.some(s => s.study_summaries?.length > 0))
-  );
 
   return (
     <main className="mx-auto max-w-5xl p-6">
@@ -78,30 +73,37 @@ export default async function BibliotecaCicloPage({
       <h1 className="text-3xl font-bold">{cicloNome}</h1>
       <p className="mt-2 text-slate-600">Selecione a matéria para explorar os tópicos e capítulos.</p>
 
-      {materiaisComConteudo.length === 0 ? (
-        <div className="mt-12 text-center">
-          <div className="text-5xl mb-4">📚</div>
-          <p className="text-slate-500 text-lg">Nenhum resumo publicado ainda neste ciclo.</p>
-          <p className="text-slate-400 text-sm mt-1">Em breve novos conteúdos serão adicionados.</p>
-        </div>
-      ) : (
-        <div className="mt-6 space-y-5">
-          {materiaisComConteudo.map(m => (
+      <div className="mt-6 space-y-5">
+        {materiais.map(m => {
+          // Filtrar apenas tópicos com ao menos 1 resumo publicado
+          const topicsVisiveis = (m.topics ?? [])
+            .map(t => ({
+              ...t,
+              subtopics: (t.subtopics ?? [])
+                .map(s => ({
+                  ...s,
+                  study_summaries: (s.study_summaries ?? []).filter(r => r.status === 'published'),
+                }))
+                .filter(s => s.study_summaries.length > 0),
+            }))
+            .filter(t => t.subtopics.length > 0)
+            .sort((a, b) => a.order_index - b.order_index);
+
+          return (
             <article key={m.id} className="card p-5">
               <h2 className="text-xl font-bold text-slate-800 mb-3">{m.nome}</h2>
 
-              <div className="space-y-3">
-                {m.topics
-                  ?.filter(t => t.subtopics?.some(s => s.study_summaries?.length > 0))
-                  .sort((a, b) => a.order_index - b.order_index)
-                  .map(t => (
+              {topicsVisiveis.length === 0 ? (
+                <p className="text-sm text-slate-400 italic">Nenhum resumo disponível ainda. Em breve!</p>
+              ) : (
+                <div className="space-y-3">
+                  {topicsVisiveis.map(t => (
                     <div key={t.id}>
                       <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500 mb-2">
                         {t.nome}
                       </h3>
                       <div className="space-y-1 ml-2">
                         {t.subtopics
-                          ?.filter(s => s.study_summaries?.length > 0)
                           .sort((a, b) => a.ordem - b.ordem)
                           .map(s => (
                             <div key={s.id} className="space-y-1">
@@ -126,11 +128,12 @@ export default async function BibliotecaCicloPage({
                       </div>
                     </div>
                   ))}
-              </div>
+                </div>
+              )}
             </article>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </main>
   );
 }
