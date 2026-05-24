@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 interface Resumo {
   id: string;
@@ -14,9 +15,7 @@ interface Resumo {
 }
 
 interface Material { id: string; nome: string; }
-
 interface Stats { total: number; published: number; draft: number; }
-
 interface Props {
   resumos: Resumo[];
   materiais: Material[];
@@ -33,30 +32,89 @@ function formatDate(d: string | null) {
   return new Date(d).toLocaleDateString('pt-BR');
 }
 
-export default function AdminResumosList({ resumos, materiais, stats }: Props) {
+function Toast({ msg, visible }: { msg: string; visible: boolean }) {
+  return (
+    <div style={{
+      position: 'fixed', bottom: '24px', right: '24px',
+      background: 'var(--surface)', border: '1px solid var(--green)', color: 'var(--green)',
+      padding: '12px 18px', borderRadius: 'var(--radius)', fontSize: '13px', fontWeight: 500,
+      display: visible ? 'flex' : 'none', alignItems: 'center', gap: '8px',
+      zIndex: 999, boxShadow: '0 4px 20px rgba(0,0,0,.4)',
+    }}>
+      ✅ {msg}
+    </div>
+  );
+}
+
+export default function AdminResumosList({ resumos: initialResumos, materiais, stats: initialStats }: Props) {
+  const supabase = createSupabaseBrowserClient();
+
+  const [resumos, setResumos] = useState<Resumo[]>(initialResumos);
   const [nivel, setNivel] = useState<'ciclos' | 'materias' | 'lista'>('ciclos');
   const [cicloAtivo, setCicloAtivo] = useState('');
   const [materiaAtiva, setMateriaAtiva] = useState('');
+  const [toast, setToast] = useState({ visible: false, msg: '' });
+  const [deleteModal, setDeleteModal] = useState({ visible: false, id: '', titulo: '' });
+  const [deleting, setDeleting] = useState(false);
+
+  const stats = {
+    total: resumos.length,
+    published: resumos.filter(r => r.status === 'published').length,
+    draft: resumos.filter(r => r.status === 'draft').length,
+  };
 
   const resumosDaCiclo = resumos.filter(r => r.ciclo === cicloAtivo);
-  const materiasDaCiclo = materiais.filter(m => {
-    const nomes = resumosDaCiclo.map(r => r.materia);
-    return nomes.includes(m.nome);
-  });
-
+  const materiasDaCiclo = materiais.filter(m => resumosDaCiclo.map(r => r.materia).includes(m.nome));
   const resumosDaMateria = resumos.filter(r => r.ciclo === cicloAtivo && r.materia === materiaAtiva);
 
   const countPorMateria = (nome: string) => resumos.filter(r => r.materia === nome && r.ciclo === cicloAtivo).length;
   const countPorCiclo = (nome: string) => resumos.filter(r => r.ciclo === nome).length;
 
-  function goCiclo(ciclo: string) {
-    setCicloAtivo(ciclo);
-    setNivel('materias');
+  function showToast(msg: string) {
+    setToast({ visible: true, msg });
+    setTimeout(() => setToast({ visible: false, msg: '' }), 3000);
   }
 
-  function goMateria(mat: string) {
-    setMateriaAtiva(mat);
-    setNivel('lista');
+  function goCiclo(ciclo: string) { setCicloAtivo(ciclo); setNivel('materias'); }
+  function goMateria(mat: string) { setMateriaAtiva(mat); setNivel('lista'); }
+
+  function askDelete(id: string, titulo: string | null) {
+    setDeleteModal({ visible: true, id, titulo: titulo ?? 'Sem título' });
+  }
+
+  async function confirmDelete() {
+    setDeleting(true);
+    try {
+      // 1. Buscar resumo para checar PDF
+      const { data: r } = await supabase
+        .from('study_summaries')
+        .select('pdf_url, content_type')
+        .eq('id', deleteModal.id)
+        .single();
+
+      // 2. Deletar PDF do Storage se existir
+      if (r?.content_type === 'pdf' && r?.pdf_url) {
+        const rawPath = r.pdf_url.split('/resumos-pdf/')[1];
+        if (rawPath) {
+          await supabase.storage.from('resumos-pdf').remove([decodeURIComponent(rawPath)]);
+        }
+      }
+
+      // 3. Deletar do banco
+      const { error } = await supabase.from('study_summaries').delete().eq('id', deleteModal.id);
+      if (error) throw error;
+
+      // 4. Atualizar lista local sem reload
+      setResumos(prev => prev.filter(r => r.id !== deleteModal.id));
+      setDeleteModal({ visible: false, id: '', titulo: '' });
+      showToast('Resumo excluído com sucesso!');
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message ?? 'Erro ao excluir';
+      showToast('Erro: ' + msg);
+      setDeleteModal({ visible: false, id: '', titulo: '' });
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -79,18 +137,24 @@ export default function AdminResumosList({ resumos, materiais, stats }: Props) {
         .adm-folder-name{font-size:13px;font-weight:600;color:var(--text)}
         .adm-folder-count{font-size:11px;color:var(--text-muted);margin-top:2px}
         .adm-resumo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-        .adm-resumo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .15s;position:relative}
-        .adm-resumo-card:hover{border-color:var(--primary);transform:translateY(-1px)}
+        .adm-resumo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:all .15s;position:relative}
+        .adm-resumo-card:hover{border-color:var(--border-bright)}
         .adm-resumo-card-icon{font-size:18px;margin-bottom:10px}
         .adm-resumo-card-title{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:6px;color:var(--text)}
         .adm-resumo-card-meta{font-size:11px;color:var(--text-muted)}
-        .adm-resumo-card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+        .adm-resumo-card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap}
         .adm-resumo-badge{position:absolute;top:12px;right:12px}
         .adm-status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500}
         .adm-status-active{background:var(--green-dim);color:var(--green)}.adm-status-draft{background:rgba(245,158,11,.12);color:var(--yellow)}
         .adm-page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px}
         .adm-page-title{font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--text)}
         .adm-page-subtitle{font-size:13px;color:var(--text-dim);margin-top:3px}
+        .adm-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px)}
+        .adm-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+        .adm-modal-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px}
+        .adm-modal-body{font-size:13px;color:var(--text-dim);margin-bottom:20px;line-height:1.6}
+        .adm-modal-resumo-name{font-size:14px;font-weight:600;color:var(--text);margin:8px 0;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm)}
+        .adm-modal-actions{display:flex;gap:10px;justify-content:flex-end}
         @media(max-width:700px){.adm-folder-grid,.adm-resumo-grid{grid-template-columns:1fr}.adm-stats-row{grid-template-columns:repeat(2,1fr)}}
       `}} />
 
@@ -149,7 +213,7 @@ export default function AdminResumosList({ resumos, materiais, stats }: Props) {
       {/* NÍVEL 2 — MATÉRIAS */}
       {nivel === 'materias' && (
         <div className="adm-folder-grid">
-          {materiais.map(m => (
+          {materiasDaCiclo.map(m => (
             <div key={m.id} className="adm-folder-card" onClick={() => goMateria(m.nome)}>
               <div className="adm-folder-icon">📂</div>
               <div>
@@ -158,7 +222,7 @@ export default function AdminResumosList({ resumos, materiais, stats }: Props) {
               </div>
             </div>
           ))}
-          {materiais.length === 0 && (
+          {materiasDaCiclo.length === 0 && (
             <p style={{ gridColumn: '1/-1', color: 'var(--text-muted)', fontSize: '13px', padding: '20px 0' }}>
               Nenhum resumo neste ciclo ainda.{' '}
               <Link href="/admin/resumos/novo" className="adm-btn adm-btn-primary adm-btn-sm" style={{ display: 'inline-flex' }}>Criar agora</Link>
@@ -184,12 +248,52 @@ export default function AdminResumosList({ resumos, materiais, stats }: Props) {
                 <div className="adm-resumo-card-actions">
                   <Link href={`/admin/resumos/${r.id}/editar`} className="adm-btn adm-btn-primary adm-btn-sm">✏️ Editar</Link>
                   <Link href={`/resumos/${r.id}`} target="_blank" className="adm-btn adm-btn-ghost adm-btn-sm">👁</Link>
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn-danger adm-btn-sm"
+                    onClick={() => askDelete(r.id, r.titulo)}
+                  >
+                    🗑
+                  </button>
                 </div>
               </div>
             ))
           )}
         </div>
       )}
+
+      {/* MODAL DE CONFIRMAÇÃO */}
+      {deleteModal.visible && (
+        <div className="adm-modal-overlay" onClick={() => !deleting && setDeleteModal({ visible: false, id: '', titulo: '' })}>
+          <div className="adm-modal" onClick={e => e.stopPropagation()}>
+            <div className="adm-modal-title">⚠️ Excluir resumo?</div>
+            <div className="adm-modal-resumo-name">"{deleteModal.titulo}"</div>
+            <div className="adm-modal-body">
+              Esta ação não pode ser desfeita. O conteúdo e o arquivo PDF (se houver) serão removidos permanentemente.
+            </div>
+            <div className="adm-modal-actions">
+              <button
+                type="button"
+                className="adm-btn adm-btn-ghost"
+                onClick={() => setDeleteModal({ visible: false, id: '', titulo: '' })}
+                disabled={deleting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="adm-btn adm-btn-danger"
+                onClick={confirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'Excluindo...' : '🗑 Sim, excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Toast msg={toast.msg} visible={toast.visible} />
     </>
   );
 }
