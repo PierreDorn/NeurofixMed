@@ -1,0 +1,119 @@
+'use server';
+
+type Role = 'system' | 'user' | 'assistant';
+type Msg = { role: Role; content: string };
+
+const SYSTEM_PROMPT = `Você é o NeuroFix Med, um tutor de medicina especializado em ajudar estudantes brasileiros (graduação e residência).
+- Responda em português do Brasil.
+- Seja claro, objetivo e didático. Use linguagem médica correta mas acessível.
+- Quando possível, use marcadores, tabelas e mnemônicos para fixação.
+- Foque no que cai em prova (faculdade, ENAMED, residência).
+- Se o aluno pedir resumo, flashcards, questões ou kit, devolva no formato pedido.`;
+
+async function chamarOpenAI(messages: Msg[], opts?: { model?: string; temperature?: number }) {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) {
+    return {
+      ok: false as const,
+      error: 'OPENAI_API_KEY não configurada. Adicione no .env.local para ativar a IA.',
+    };
+  }
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: opts?.model ?? 'gpt-4o-mini',
+        temperature: opts?.temperature ?? 0.6,
+        messages,
+      }),
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      return { ok: false as const, error: `OpenAI ${res.status}: ${txt.slice(0, 300)}` };
+    }
+    const data = await res.json();
+    const content: string = data?.choices?.[0]?.message?.content ?? '';
+    return { ok: true as const, content };
+  } catch (e) {
+    return { ok: false as const, error: e instanceof Error ? e.message : 'erro desconhecido' };
+  }
+}
+
+export async function enviarMensagem(historico: Msg[], novaMensagem: string) {
+  const messages: Msg[] = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    ...historico,
+    { role: 'user', content: novaMensagem },
+  ];
+  return chamarOpenAI(messages);
+}
+
+export async function gerarFlashcards(tema: string, contexto?: string) {
+  const prompt = `Crie 10 flashcards de medicina sobre: "${tema}".
+${contexto ? `Contexto adicional: ${contexto}` : ''}
+
+Devolva APENAS um JSON válido com este formato (sem markdown, sem \`\`\`):
+{"flashcards":[{"frente":"...","verso":"..."}]}
+
+Cada flashcard deve ter pergunta clínica curta na frente e resposta objetiva no verso. Foque em pontos de prova.`;
+  return chamarOpenAI(
+    [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: prompt },
+    ],
+    { temperature: 0.4 },
+  );
+}
+
+export async function gerarResumo(tema: string) {
+  const prompt = `Crie um resumo estruturado de medicina sobre: "${tema}".
+Inclua: definição, fisiopatologia, manifestações clínicas, diagnóstico, tratamento e pontos de prova.
+Use markdown com cabeçalhos, listas e tabelas quando útil.`;
+  return chamarOpenAI(
+    [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: prompt },
+    ],
+    { temperature: 0.5 },
+  );
+}
+
+export async function gerarQuestoes(tema: string) {
+  const prompt = `Crie 5 questões de múltipla escolha estilo prova de residência sobre: "${tema}".
+
+Devolva APENAS um JSON válido (sem markdown):
+{"questoes":[{"enunciado":"...","alternativas":["A) ...","B) ...","C) ...","D) ..."],"correta":0,"explicacao":"..."}]}
+
+Use casos clínicos quando possível. Indicador "correta" é o índice (0-3).`;
+  return chamarOpenAI(
+    [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: prompt },
+    ],
+    { temperature: 0.4 },
+  );
+}
+
+export async function gerarKitCompleto(tema: string) {
+  const prompt = `Crie um kit completo de estudo de medicina sobre: "${tema}".
+
+Devolva APENAS um JSON válido (sem markdown):
+{
+  "resumo": "markdown do resumo",
+  "flashcards": [{"frente":"...","verso":"..."}],
+  "questoes": [{"enunciado":"...","alternativas":["A)...","B)...","C)...","D)..."],"correta":0,"explicacao":"..."}]
+}
+
+Inclua: 1 resumo estruturado, 10 flashcards e 5 questões.`;
+  return chamarOpenAI(
+    [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: prompt },
+    ],
+    { temperature: 0.5 },
+  );
+}

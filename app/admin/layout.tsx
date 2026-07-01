@@ -2,14 +2,14 @@ import { createServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
-const ADMIN_EMAIL = 'neurofixmed@gmail.com';
+const ADMIN_EMAILS = ['neurofixmed@gmail.com', 'pierre.doerner01@gmail.com'];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect('/login');
-  if (user.email !== ADMIN_EMAIL) redirect('/dashboard');
+  if (!ADMIN_EMAILS.includes(user.email ?? '')) redirect('/dashboard');
 
   const firstName = user.user_metadata?.full_name?.split(' ')[0] ?? 'Admin';
   const initials = firstName.charAt(0).toUpperCase();
@@ -43,14 +43,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         .adm-nav-item:hover{background:var(--surface2);color:var(--text)}
         .adm-nav-item.active{background:var(--primary-glow);color:var(--primary);border-color:rgba(59,130,246,.2);font-weight:500}
         .adm-main{flex:1;padding:28px 32px;overflow-y:auto;background:var(--bg)}
-        .adm-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Sora',sans-serif;text-decoration:none}
+        .adm-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:background-color 150ms ease,color 150ms ease,border-color 150ms ease,box-shadow 150ms ease,opacity 150ms ease;font-family:'Sora',sans-serif;text-decoration:none}
+        .adm-btn:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
         .adm-btn-primary{background:var(--primary);color:white;box-shadow:0 2px 8px rgba(59,130,246,.25)}
-        .adm-btn-primary:hover{background:var(--primary-dim);transform:translateY(-1px)}
+        .adm-btn-primary:hover{background:var(--primary-dim)}
         .adm-btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border)}
         .adm-btn-ghost:hover{background:var(--surface2);color:var(--text)}
         .adm-btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.2)}
         .adm-btn-success{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.2)}
-        .adm-btn-sm{padding:5px 11px;font-size:12px}
+        .adm-btn-sm{padding:6px 12px;font-size:12px;min-height:32px}
+        .adm-nav-item:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+        @media(prefers-reduced-motion:reduce){.adm-btn,.adm-nav-item,.adm-folder-card{transition:none!important}}
       `}} />
       <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
       <div className="adm-wrap">
@@ -68,10 +71,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="adm-layout">
           <nav className="adm-sidebar">
             <div className="adm-sidebar-label">Conteúdo</div>
-            <Link href="/admin/materias" className="adm-nav-item">📚 Matérias</Link>
-            <Link href="/admin/topicos" className="adm-nav-item">📂 Tópicos</Link>
-            <Link href="/admin/questoes" className="adm-nav-item">❓ Questões</Link>
+            <Link href="/admin/hierarquia" className="adm-nav-item">🗂 Hierarquia</Link>
             <Link href="/admin/resumos" className="adm-nav-item">📝 Resumos</Link>
+            <Link href="/admin/questoes" className="adm-nav-item">❓ Questões</Link>
             <div className="adm-sidebar-label" style={{ marginTop: '12px' }}>Usuários</div>
             <Link href="/admin/estudantes" className="adm-nav-item">👥 Estudantes</Link>
           </nav>

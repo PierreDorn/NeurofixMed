@@ -9,7 +9,7 @@ export default async function EditarResumoPage({ params }: { params: Promise<{ i
   const [{ data: resumo }, { data: materiais }] = await Promise.all([
     supabase
       .from('study_summaries')
-      .select('id, titulo, content_html, content_type, pdf_url, pdf_filename, pdf_size, status, ciclo, materia, topico, topic_id, subtopic_id')
+      .select('id, titulo, content_html, content_type, pdf_url, pdf_filename, pdf_size, status, ciclo, materia, topico, topic_id, subtopic_id, sub_subtopic_id')
       .eq('id', id)
       .single(),
     supabase.from('materiais').select('id, nome, ciclo').eq('ativo', true).order('ordem'),
@@ -34,6 +34,7 @@ export default async function EditarResumoPage({ params }: { params: Promise<{ i
         topico: resumo.topico ?? '',
         topic_id: resumo.topic_id ?? '',
         subtopic_id: resumo.subtopic_id ?? '',
+        sub_subtopic_id: resumo.sub_subtopic_id ?? '',
       }}
     />
   );

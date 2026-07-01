@@ -4,28 +4,82 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
+import { updateUserSettings } from '@/app/(app)/configuracoes/actions';
 
 const navItems = [
-  { href: '/dashboard',  icon: '🧠', label: 'Início' },
-  { href: '/biblioteca', icon: '📚', label: 'Biblioteca' },
-  { href: '/flashcards', icon: '🔁', label: 'Flashcards' },
-  { href: '/desempenho', icon: '📈', label: 'Desempenho' },
-  { href: '/perfil',     icon: '⚙️', label: 'Perfil' },
+  {
+    href: '/dashboard',
+    label: 'Início',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    ),
+  },
+  {
+    href: '/ia',
+    label: 'Estudar com IA',
+    hidden: true, // MVP: oculto visualmente — funções/rotas preservadas. Ver lancamento-futuro/04-sidebar-estudar-ia.md
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/>
+        <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8z"/>
+        <path d="M5 14l.6 1.6L7 16l-1.4.4L5 18l-.6-1.6L3 16l1.4-.4z"/>
+      </svg>
+    ),
+  },
+  {
+    href: '/biblioteca',
+    label: 'Biblioteca',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+    ),
+  },
+  {
+    href: '/flashcards',
+    label: 'Flashcards',
+    hidden: true, // MVP: oculto visualmente — funções/rotas preservadas. Ver lancamento-futuro/README.md
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <line x1="2" y1="10" x2="22" y2="10"/>
+      </svg>
+    ),
+  },
 ];
 
 const menuItems = [
-  { icon: '⚙️', label: 'Configurações',  href: '/perfil',     disabled: false },
-  { icon: '🔒', label: 'Segurança',       href: '#',           disabled: true  },
-  { icon: '🔔', label: 'Notificações',    href: '#',           disabled: true  },
-  { icon: '❓', label: 'Ajuda',           href: '#',           disabled: true  },
+  { icon: '⚙️', label: 'Configurações', href: '/configuracoes', disabled: false },
+  { icon: '🔔', label: 'Notificações',   href: '/configuracoes#notificacoes', disabled: true  }, // MVP: ver lancamento-futuro/05-agenda-notificacoes-srs.md
+  { icon: '❓', label: 'Ajuda',          href: '#',        disabled: true  },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [menuAberto, setMenuAberto] = useState(false);
+  const [temaClaro, setTemaClaro] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Fecha o menu ao clicar fora
+  useEffect(() => {
+    setTemaClaro(document.querySelector('.app-shell')?.classList.contains('tema-claro') ?? false);
+  }, []);
+
+  async function toggleTema() {
+    const novoTema = temaClaro ? 'dark' : 'light';
+    setTemaClaro(!temaClaro);
+    const shell = document.querySelector('.app-shell');
+    if (!temaClaro) {
+      shell?.classList.add('tema-claro');
+    } else {
+      shell?.classList.remove('tema-claro');
+    }
+    await updateUserSettings({ tema_preferido: novoTema });
+  }
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -38,123 +92,100 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar">
-      {/* Logo oficial NeuroFix Med */}
-      <div className="sidebar-logo" style={{ padding: '20px 16px 16px' }}>
-        <Link href="/dashboard" style={{ display: 'block', textDecoration: 'none' }}>
+
+      {/* Logo — PNG transparente, funciona em ambos os temas */}
+      <div className="logo-area">
+        <Link href="/dashboard">
           <Image
-            src="/logo.png"
+            src="/logo-claro.png"
             alt="NeuroFix Med"
-            width={200}
-            height={60}
-            style={{ width: '100%', maxWidth: '200px', height: 'auto', objectFit: 'contain' }}
+            width={1429}
+            height={274}
+            style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
             priority
           />
         </Link>
       </div>
 
       {/* Navegação */}
-      <nav className="sidebar-nav">
-        <span className="nav-section-label">Estudar</span>
+      <div className="nav-wrap">
+        <div className="nav-title">Estudar</div>
+        <nav className="sidebar-nav-list">
+          {navItems.filter((item) => !(item as { hidden?: boolean }).hidden).map((item) => {
+            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`nav-link${isActive ? ' active' : ''}`}
+              >
+                <span className="nav-icon">{item.icon}</span>
+                <span className="nav-label">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
 
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`nav-item ${isActive ? 'active' : ''}`}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Theme toggle */}
+      <div style={{ padding: '0 10px 10px' }}>
+        <button type="button" className="theme-toggle-btn" onClick={toggleTema}>
+          {temaClaro ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          )}
+          {temaClaro ? 'Tema escuro' : 'Tema claro'}
+        </button>
+      </div>
+
+      {/* Footer badge */}
+      <div className="sidebar-footer">
+        <span className="sidebar-footer-badge">Biblioteca ativa</span>
+        <p>Conteúdos organizados para revisar, conectar e fixar medicina.</p>
+      </div>
 
       {/* Botão NF + Menu flutuante */}
       <div
         ref={menuRef}
         style={{ padding: '12px 14px', borderTop: '1px solid rgba(201,164,85,0.14)', position: 'relative' }}
       >
-        {/* Menu popup — aparece acima do botão, ancorado à esquerda */}
         {menuAberto && (
-          <div style={{
-            position: 'absolute',
-            bottom: 'calc(100% + 8px)',
-            left: '14px',
-            width: '210px',
-            background: '#111111',
-            border: '1px solid rgba(201,164,85,0.22)',
-            borderRadius: '14px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-            overflow: 'hidden',
-            zIndex: 50,
-          }}>
-            {/* Cabeçalho do menu */}
-            <div style={{
-              padding: '14px 16px',
-              borderBottom: '1px solid rgba(201,164,85,0.14)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-            }}>
-              {/* Mini avatar NF */}
-              <div style={{
-                width: '34px', height: '34px', borderRadius: '50%',
-                background: 'linear-gradient(135deg, #8A6020, #D4A84B)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: "'Inter', sans-serif", fontWeight: '800',
-                fontSize: '13px', color: '#050505', flexShrink: 0,
-                letterSpacing: '-0.02em',
-              }}>
-                NF
-              </div>
+          <div className="nf-menu-popup">
+            <div className="nf-menu-header">
+              <div className="nf-menu-avatar">NF</div>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#f1f5f9', lineHeight: 1.2 }}>
-                  NeuroFix Med
-                </div>
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                  Minha conta
-                </div>
+                <div className="nf-menu-account-name">NeuroFix Med</div>
+                <div className="nf-menu-account-sub">Minha conta</div>
               </div>
             </div>
 
-            {/* Itens do menu */}
             <div style={{ padding: '6px' }}>
               {menuItems.map((item) => (
                 item.disabled ? (
-                  <div
-                    key={item.label}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                      padding: '9px 10px', borderRadius: '8px',
-                      color: '#374151', fontSize: '13px', fontWeight: '600',
-                      cursor: 'not-allowed',
-                    }}
-                  >
+                  <div key={item.label} className="nf-menu-item nf-menu-item-disabled">
                     <span style={{ fontSize: '14px', opacity: 0.4 }}>{item.icon}</span>
                     <span style={{ opacity: 0.4 }}>{item.label}</span>
-                    <span style={{
-                      marginLeft: 'auto', fontSize: '9px', fontWeight: '700',
-                      background: 'rgba(201,164,85,0.12)', color: '#C9A455',
-                      padding: '2px 6px', borderRadius: '4px', opacity: 0.7,
-                    }}>
-                      em breve
-                    </span>
+                    <span className="nf-menu-soon">em breve</span>
                   </div>
                 ) : (
                   <Link
                     key={item.label}
                     href={item.href}
                     onClick={() => setMenuAberto(false)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                      padding: '9px 10px', borderRadius: '8px',
-                      color: '#cbd5e1', fontSize: '13px', fontWeight: '600',
-                      textDecoration: 'none', transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    className="nf-menu-item"
                   >
                     <span style={{ fontSize: '14px' }}>{item.icon}</span>
                     {item.label}
@@ -163,21 +194,9 @@ export function Sidebar() {
               ))}
             </div>
 
-            {/* Divisor + Sair */}
-            <div style={{ borderTop: '1px solid rgba(201,164,85,0.12)', padding: '6px' }}>
+            <div className="nf-menu-divider">
               <form action="/auth/logout" method="post">
-                <button
-                  type="submit"
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    width: '100%', padding: '9px 10px', borderRadius: '8px',
-                    background: 'transparent', border: 'none', cursor: 'pointer',
-                    color: '#ef4444', fontSize: '13px', fontWeight: '700',
-                    transition: 'background 0.15s', textAlign: 'left',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                >
+                <button type="submit" className="nf-menu-logout">
                   <span style={{ fontSize: '14px' }}>🚪</span>
                   Sair
                 </button>
@@ -186,7 +205,6 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* Botão circular NF */}
         <button
           onClick={() => setMenuAberto(prev => !prev)}
           style={{

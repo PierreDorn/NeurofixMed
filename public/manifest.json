@@ -1,0 +1,21 @@
+{
+  "name": "NeuroFix Med",
+  "short_name": "NeuroFix",
+  "description": "Plataforma de estudos médicos com revisão automática, flashcards e agenda inteligente.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#C9A84C",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "categories": ["education", "medical", "productivity"],
+  "icons": [
+    {
+      "src": "/neurofix-logo.png",
+      "sizes": "192x192 512x512 any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

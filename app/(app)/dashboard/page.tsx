@@ -1,5 +1,18 @@
 import { createServerClient } from '@/lib/supabase-server';
 import Link from 'next/link';
+import AgendaView from '@/components/agenda/AgendaView';
+import DashboardAdvancedSettings from '@/components/dashboard/DashboardAdvancedSettings';
+
+const SETTINGS_DEFAULTS = {
+  revisao_automatica_ativa: true,
+  horario_estudo_inicio: '08:00',
+  horario_estudo_fim: '22:00',
+  dias_semana_estudo: ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'],
+  intervalo_revisao_1: 1,
+  intervalo_revisao_2: 24,
+  intervalo_revisao_3: 168,
+  intervalo_revisao_4: 720,
+};
 
 const discColorMap = ['gold','blue','emerald','magenta','cyan','rose','amber','violet'] as const;
 
@@ -93,6 +106,25 @@ export default async function Dashboard() {
 
   const totalHoje = (flashcardsPendentes ?? 0) + Math.min(flashcardsNovos ?? 0, 10);
 
+  // ── AGENDA + SETTINGS para a nova seção embarcada no dashboard ──
+  const agendaNow = new Date();
+  const agendaStart = new Date(agendaNow); agendaStart.setDate(agendaNow.getDate() - 35);
+  const agendaEnd = new Date(agendaNow);   agendaEnd.setDate(agendaNow.getDate() + 90);
+
+  const [{ data: agendaEvents }, { data: agendaRecurrences }, { data: userSettingsRow }] = await Promise.all([
+    supabase
+      .from('events')
+      .select('id, titulo, descricao, data_inicio, data_fim, dia_todo, tipo, cor, local, origem, referencia_id, referencia_tipo, concluido')
+      .eq('user_id', user.id)
+      .order('data_inicio'),
+    supabase
+      .from('event_recurrence')
+      .select('event_id, frequencia, intervalo, dias_semana, data_fim_recorrencia'),
+    supabase.from('user_settings').select('*').eq('user_id', user.id).maybeSingle(),
+  ]);
+
+  const mergedSettings = { ...SETTINGS_DEFAULTS, ...(userSettingsRow ?? {}) };
+
   const focoLabel: Record<string, string> = {
     faculdade: 'Provas da faculdade', enamed: 'ENAMED',
     residencia: 'Residência médica', revisao: 'Revisão geral',
@@ -157,7 +189,7 @@ export default async function Dashboard() {
           background: linear-gradient(180deg, rgba(15,19,28,0.9), rgba(10,13,20,0.9));
           padding: 36px 40px;
           position: relative; overflow: hidden;
-          display: grid; grid-template-columns: 1fr 1.05fr; gap: 36px; align-items: stretch;
+          display: block;
         }
         .nf-hero::before {
           content: ''; position: absolute; right: -120px; top: -180px;
@@ -562,60 +594,22 @@ export default async function Dashboard() {
               </div>
             </div>
 
-            <div className="nf-hero-r">
-              <div className="nf-continue-head">
-                <span className="nf-continue-title">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/><circle cx="12" cy="12" r="10"/></svg>
-                  Continue de onde parou
-                </span>
-                <Link className="nf-continue-link" href="/flashcards">Ver tudo →</Link>
-              </div>
-
-              <Link className="nf-cont-card" href="/flashcards">
-                <div className="nf-cont-thumb">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="6" width="14" height="12" rx="2"/><rect x="7" y="3" width="14" height="12" rx="2"/></svg>
-                </div>
-                <div className="nf-cont-info">
-                  <div className="nf-cont-meta">Flashcards · Repetição espaçada</div>
-                  <div className="nf-cont-name">
-                    {flashcardsPendentes && flashcardsPendentes > 0
-                      ? `${flashcardsPendentes} card${flashcardsPendentes > 1 ? 's' : ''} aguardando revisão`
-                      : 'Explore cards novos para fixar'}
-                  </div>
-                  <div className="nf-cont-bar">
-                    <span style={{ width: flashcardsNovos && flashcardsNovos > 0 ? `${Math.min(((flashcardsPendentes ?? 0) / ((flashcardsPendentes ?? 0) + (flashcardsNovos ?? 0) + 1)) * 100, 100)}%` : '0%' }} />
-                  </div>
-                  <div className="nf-cont-pct">{flashcardsPendentes ?? 0} pendentes · {flashcardsNovos ?? 0} novos</div>
-                </div>
-                <div className="nf-cont-go">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </Link>
-
-              <div className="nf-hero-quick">
-                <Link className="nf-qa" href="/flashcards">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="6" width="14" height="12" rx="2"/><rect x="7" y="3" width="14" height="12" rx="2"/></svg>
-                  <span className="nf-qa-name">Próxima revisão</span>
-                  <span className="nf-qa-extra">{flashcardsPendentes ?? 0} cards</span>
-                </Link>
-                <Link className="nf-qa" href="/biblioteca">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                  <span className="nf-qa-name">Biblioteca</span>
-                  <span className="nf-qa-extra">{materiais?.length ?? 0} disciplinas</span>
-                </Link>
-                <Link className="nf-qa" href="/biblioteca">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  <span className="nf-qa-name">Questão do dia</span>
-                  <span className="nf-qa-extra">Nível prova</span>
-                </Link>
-                <Link className="nf-qa" href="/tarefas">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                  <span className="nf-qa-name">Plano de hoje</span>
-                  <span className="nf-qa-extra">{totalHoje} itens</span>
-                </Link>
-              </div>
-            </div>
           </section>
+
+          {/* MVP: agenda e configurações avançadas desconectadas. Ver lancamento-futuro/05-agenda-notificacoes-srs.md */}
+          {false && (
+            <>
+              <section className="nf-section">
+                <AgendaView
+                  events={agendaEvents ?? []}
+                  recurrences={agendaRecurrences ?? []}
+                  windowStartISO={agendaStart.toISOString()}
+                  windowEndISO={agendaEnd.toISOString()}
+                />
+              </section>
+              <DashboardAdvancedSettings settings={mergedSettings} />
+            </>
+          )}
 
           {/* ── TOOLS ── */}
           <section className="nf-section">
@@ -779,12 +773,13 @@ export default async function Dashboard() {
                 </div>
               </div>
 
-              {/* TODAY */}
+              {/* TODAY — MVP: oculto. Ver lancamento-futuro/05-agenda-notificacoes-srs.md */}
+              {false && (
               <div className="nf-panel">
                 <div className="nf-panel-head">
                   <span className="nf-panel-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    Plano de hoje
+                    Agenda Semanal
                   </span>
                   <Link className="nf-panel-link" href="/tarefas">Editar</Link>
                 </div>
@@ -831,8 +826,10 @@ export default async function Dashboard() {
                   </div>
                 </div>
               </div>
+              )}
 
-              {/* AGENDA */}
+              {/* AGENDA — MVP: oculto. Ver lancamento-futuro/05-agenda-notificacoes-srs.md */}
+              {false && (
               <div className="nf-panel">
                 <div className="nf-panel-head">
                   <span className="nf-panel-title">
@@ -861,6 +858,7 @@ export default async function Dashboard() {
                   ))}
                 </div>
               </div>
+              )}
 
             </div>
           </section>

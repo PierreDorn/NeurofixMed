@@ -19,6 +19,7 @@ function slugify(str: string) {
 interface Material { id: string; nome: string; ciclo: string | null; }
 interface Topico { id: string; nome: string; order_index: number; }
 interface Subtopic { id: string; nome: string; ordem: number; }
+interface SubSubtopic { id: string; nome: string; ordem: number; }
 interface PDFFile { file: File; name: string; size: string; objectURL: string; }
 interface ImgItem { name: string; size: string; dataUrl: string; file: File; }
 
@@ -36,6 +37,7 @@ interface InitialData {
   topico?: string;
   topic_id?: string;
   subtopic_id?: string;
+  sub_subtopic_id?: string;
 }
 
 interface Props {
@@ -64,7 +66,6 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
   const supabase = createSupabaseBrowserClient();
   const imgInputRef = useRef<HTMLInputElement>(null);
 
-  const [titulo, setTitulo] = useState(initial?.titulo ?? '');
   const [tipo, setTipo] = useState<'texto' | 'pdf'>((initial?.content_type as 'texto' | 'pdf') ?? 'texto');
   const [htmlContent, setHtmlContent] = useState(initial?.content_html ?? '<p>Comece a escrever aqui...</p>');
   const [pdfFile, setPdfFile] = useState<PDFFile | null>(null);
@@ -88,27 +89,58 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
   const [criarTopico, setCriarTopico] = useState(false);
 
   const [subtopics, setSubtopics] = useState<Subtopic[]>([]);
-  const [subtopicId, setSubtopicId] = useState(initial?.subtopic_id ?? '');
-  const [subtopicNome, setSubtopicNome] = useState('');
+  const [capituloSelecionado, setCapituloSelecionado] = useState(initial?.subtopic_id ?? '');
   const [criarSubtopic, setCriarSubtopic] = useState(false);
-  const [subtopicOrdem, setSubtopicOrdem] = useState(1);
+  const [subtopicNovaNome, setSubtopicNovaNome] = useState('');
+
+  // Criar matéria
+  const [criarMateria, setCriarMateria] = useState(false);
+  const [materiaNovaNome, setMateriaNovaNome] = useState('');
+
+  // Sub-subtópico
+  const [subSubtopics, setSubSubtopics] = useState<SubSubtopic[]>([]);
+  const [subSubtopicId, setSubSubtopicId] = useState(initial?.sub_subtopic_id ?? '');
+  const [subSubtopicNome, setSubSubtopicNome] = useState('');
+  const [criarSubSubtopic, setCriarSubSubtopic] = useState(false);
+
+  // Ordem de cada nível da hierarquia
+  const [materiaOrdem, setMateriaOrdem] = useState(0);
+  const [topicOrdem, setTopicOrdem] = useState(0);
+  const [subtopicOrdem, setSubtopicOrdem] = useState(0);
+  const [subSubtopicOrdem, setSubSubtopicOrdem] = useState(0);
 
   // Carregar tópicos quando matéria muda
   useEffect(() => {
     if (!materiaId) { setTopicos([]); setTopicId(''); return; }
     supabase.from('topics').select('id, nome, order_index').eq('material_id', materiaId).order('order_index')
       .then(({ data }) => setTopicos(data ?? []));
+    supabase.from('materiais').select('ordem').eq('id', materiaId).single()
+      .then(({ data }) => setMateriaOrdem(data?.ordem ?? 0));
   }, [materiaId]);
 
-  // Carregar capítulos quando tópico muda
+  // Carregar subtópicos quando tópico muda
   useEffect(() => {
     if (!topicId || criarTopico) { setSubtopics([]); return; }
     supabase.from('subtopics').select('id, nome, ordem').eq('topic_id', topicId).order('ordem')
-      .then(({ data }) => {
-        setSubtopics(data ?? []);
-        if (data && data.length > 0) setSubtopicOrdem(data.length + 1);
-      });
+      .then(({ data }) => setSubtopics(data ?? []));
+    const t = topicos.find(t => t.id === topicId);
+    setTopicOrdem((t as { order_index?: number })?.order_index ?? 0);
   }, [topicId, criarTopico]);
+
+  // Carregar sub-subtópicos quando capítulo muda
+  useEffect(() => {
+    if (!capituloSelecionado) { setSubSubtopics([]); setSubSubtopicId(''); return; }
+    supabase.from('sub_subtopics').select('id, nome, ordem').eq('subtopic_id', capituloSelecionado).order('ordem')
+      .then(({ data }) => setSubSubtopics(data ?? []));
+    const s = subtopics.find(s => s.id === capituloSelecionado);
+    setSubtopicOrdem(s?.ordem ?? 0);
+  }, [capituloSelecionado]);
+
+  // Ordem do sub-subtópico
+  useEffect(() => {
+    const ss = subSubtopics.find(s => s.id === subSubtopicId);
+    setSubSubtopicOrdem(ss?.ordem ?? 0);
+  }, [subSubtopicId]);
 
   function showToast(msg: string) {
     setToast({ visible: true, msg });
@@ -147,45 +179,102 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
     return map;
   }
 
+
   async function save(targetStatus: 'draft' | 'published') {
-    if (!titulo.trim()) { showToast('Digite o título do resumo!'); return; }
-    if (!materiaId) { showToast('Selecione a matéria!'); return; }
+    if (!materiaId && !(criarMateria && materiaNovaNome.trim())) { showToast('Selecione ou crie uma matéria!'); return; }
+
+    const temTopico = topicId || ((criarTopico || criarMateria) && topicNome.trim());
+    if (targetStatus === 'published' && !temTopico) {
+      showToast('Informe o nome do tópico antes de publicar!'); return;
+    }
+
+    const temSubtopico = capituloSelecionado || ((criarSubtopic || criarTopico) && subtopicNovaNome.trim());
+    if (targetStatus === 'published' && !temSubtopico) {
+      showToast('Selecione ou crie um subtópico antes de publicar!'); return;
+    }
+
+    if ((criarSubtopic || (criarTopico && subtopicNovaNome.trim())) && !temTopico) {
+      showToast('Informe o tópico antes de criar o subtópico!'); return;
+    }
     setSaving(true);
     try {
+      // 0. Resolver matéria (criar se necessário)
+      let finalMateriaId = materiaId;
+      let finalMateriaNome = materiaNome;
+      if (criarMateria && materiaNovaNome.trim()) {
+        const { data, error } = await supabase
+          .from('materiais')
+          .insert({ nome: materiaNovaNome.trim(), ciclo, ativo: true, ordem: 999 })
+          .select('id, nome').single();
+        if (error) throw error;
+        finalMateriaId = data.id;
+        finalMateriaNome = data.nome;
+      }
+
       // 1. Resolver tópico (criar se necessário)
       let finalTopicId = topicId;
       let finalTopicNome = topicos.find(t => t.id === topicId)?.nome ?? topicNome;
-      if (criarTopico && topicNome.trim()) {
+      if ((criarTopico || criarMateria) && topicNome.trim()) {
         const { data, error } = await supabase
           .from('topics')
-          .insert({ nome: topicNome.trim(), material_id: materiaId, order_index: 0 })
+          .insert({ nome: topicNome.trim(), material_id: finalMateriaId, order_index: 0 })
           .select('id').single();
         if (error) throw error;
         finalTopicId = data.id;
         finalTopicNome = topicNome.trim();
       }
 
-      // 2. Resolver capítulo (criar se necessário)
-      let finalSubtopicId = subtopicId;
-      let finalSubtopicNome = subtopics.find(s => s.id === subtopicId)?.nome ?? subtopicNome;
-      if (criarSubtopic && subtopicNome.trim() && finalTopicId) {
-        await supabase.rpc('reorder_subtopics', { p_topic_id: finalTopicId, p_position: subtopicOrdem });
+      // 2. Resolver subtópico (criar se necessário)
+      let finalSubtopicId = capituloSelecionado;
+      let finalSubtopicNome = subtopics.find(s => s.id === capituloSelecionado)?.nome ?? subtopicNovaNome;
+      if ((criarSubtopic || criarTopico) && subtopicNovaNome.trim() && finalTopicId) {
         const { data, error } = await supabase
           .from('subtopics')
-          .insert({ nome: subtopicNome.trim(), topic_id: finalTopicId, ordem: subtopicOrdem })
+          .insert({ nome: subtopicNovaNome.trim(), topic_id: finalTopicId, ordem: subtopics.length + 1 })
           .select('id').single();
         if (error) throw error;
         finalSubtopicId = data.id;
-        finalSubtopicNome = subtopicNome.trim();
+        finalSubtopicNome = subtopicNovaNome.trim();
       }
+
+      // 3. Resolver sub-subtópico (criar se necessário)
+      let finalSubSubtopicId = subSubtopicId;
+      let finalSubSubtopicNome = subSubtopics.find(ss => ss.id === subSubtopicId)?.nome ?? subSubtopicNome;
+      if ((criarSubSubtopic || criarSubtopic || criarTopico) && subSubtopicNome.trim() && finalSubtopicId) {
+        const { data, error } = await supabase
+          .from('sub_subtopics')
+          .insert({ nome: subSubtopicNome.trim(), subtopic_id: finalSubtopicId, ordem: subSubtopics.length + 1 })
+          .select('id').single();
+        if (error) throw error;
+        finalSubSubtopicId = data.id;
+        finalSubSubtopicNome = subSubtopicNome.trim();
+      }
+
+      // 4. Atualizar ordem dos itens existentes
+      if (!criarMateria && finalMateriaId && materiaOrdem > 0) {
+        await supabase.from('materiais').update({ ordem: materiaOrdem }).eq('id', finalMateriaId);
+      }
+      if (!(criarTopico || criarMateria) && finalTopicId && topicOrdem > 0) {
+        await supabase.from('topics').update({ order_index: topicOrdem }).eq('id', finalTopicId);
+      }
+      if (!(criarSubtopic || criarTopico) && finalSubtopicId && subtopicOrdem > 0) {
+        await supabase.from('subtopics').update({ ordem: subtopicOrdem }).eq('id', finalSubtopicId);
+      }
+      if (!(criarSubSubtopic || criarSubtopic || criarTopico) && finalSubSubtopicId && subSubtopicOrdem > 0) {
+        await supabase.from('sub_subtopics').update({ ordem: subSubtopicOrdem }).eq('id', finalSubSubtopicId);
+      }
+
+      // Título derivado automaticamente do nível mais profundo
+      const titulo = finalSubSubtopicId ? finalSubSubtopicNome : (finalSubtopicNome || finalTopicNome);
 
       let payload: Record<string, unknown> = {
         titulo,
         ciclo,
-        materia: materiaNome,
+        materia: finalMateriaNome,
         topico: finalTopicNome,
         topic_id: finalTopicId || null,
         subtopic_id: finalSubtopicId || null,
+        sub_subtopic_id: finalSubSubtopicId || null,
         status: targetStatus,
         updated_at: new Date().toISOString(),
         content: '',
@@ -194,7 +283,7 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
       if (tipo === 'pdf') {
         if (!pdfFile && !initial?.pdf_url) { showToast('Selecione um PDF!'); setSaving(false); return; }
         if (pdfFile) {
-          const path = `${slugify(ciclo || 'geral')}/${slugify(materiaNome || 'geral')}/${Date.now()}_${slugify(pdfFile.name)}`;
+          const path = `${slugify(ciclo || 'geral')}/${slugify(finalMateriaNome || 'geral')}/${Date.now()}_${slugify(pdfFile.name)}`;
           const { data, error } = await supabase.storage.from('resumos-pdf').upload(path, pdfFile.file, { upsert: true });
           if (error) throw error;
           const { data: { publicUrl } } = supabase.storage.from('resumos-pdf').getPublicUrl(data.path);
@@ -227,7 +316,9 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
     }
   }
 
-  const materiasFiltradas = ciclo ? materiais.filter(m => m.ciclo === ciclo) : [];
+  const materiasFiltradas = !criarMateria
+    ? (ciclo ? materiais.filter(m => m.ciclo === ciclo) : materiais)
+    : [];
 
   return (
     <>
@@ -278,6 +369,8 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
         .adm-cascading-row{display:flex;gap:6px;align-items:stretch}
         .adm-cascading-row .adm-select{flex:1}
         .adm-hint{font-size:11px;color:var(--text-muted);margin-top:4px}
+        .adm-pos-input{width:56px;flex:none;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 8px;font-size:12px;color:var(--text);font-family:'Sora',sans-serif;outline:none;text-align:center}
+        .adm-pos-input:focus{border-color:var(--primary)}
         @media(max-width:900px){.adm-editor-layout{grid-template-columns:1fr}}
       `}} />
 
@@ -296,18 +389,6 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
       <div className="adm-editor-layout">
         {/* COLUNA PRINCIPAL */}
         <div>
-          <div className="adm-editor-card">
-            <div className="adm-editor-card-header">✏️ Título do Resumo</div>
-            <div className="adm-editor-card-body">
-              <input
-                className="adm-input"
-                style={{ fontSize: '15px', fontWeight: 600 }}
-                value={titulo}
-                onChange={e => setTitulo(e.target.value)}
-                placeholder="Ex: Anti-hipertensivos — Mecanismo de Ação"
-              />
-            </div>
-          </div>
 
           <div className="adm-editor-card">
             <div className="adm-editor-card-header">📄 Conteúdo</div>
@@ -346,9 +427,10 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
                 <label className="adm-label">Ciclo</label>
                 <select className="adm-select" value={ciclo} onChange={e => {
                   setCiclo(e.target.value);
-                  setMateriaId(''); setMateriaNome('');
+                  setMateriaId(''); setMateriaNome(''); setCriarMateria(false); setMateriaNovaNome('');
                   setTopicId(''); setTopicNome(''); setCriarTopico(false);
-                  setSubtopicId(''); setSubtopicNome(''); setCriarSubtopic(false);
+                  setCapituloSelecionado(''); setCriarSubtopic(false); setSubtopicNovaNome('');
+                  setSubSubtopicId(''); setSubSubtopicNome(''); setCriarSubSubtopic(false);
                 }}>
                   <option value="">Selecione...</option>
                   {CICLOS.map(c => <option key={c} value={c}>{c}</option>)}
@@ -356,92 +438,144 @@ export default function AdminResumoForm({ materiais, initial }: Props) {
               </div>
 
               {/* MATÉRIA */}
-              {ciclo && (
-                <div className="adm-form-group">
-                  <label className="adm-label">Matéria</label>
-                  <select className="adm-select" value={materiaId} onChange={e => {
-                    const m = materiais.find(x => x.id === e.target.value);
-                    setMateriaId(e.target.value);
-                    setMateriaNome(m?.nome ?? '');
-                    setTopicId(''); setTopicNome(''); setCriarTopico(false);
-                    setSubtopicId(''); setSubtopicNome(''); setCriarSubtopic(false);
-                  }}>
-                    <option value="">Selecione...</option>
-                    {materiasFiltradas.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
-                  </select>
-                  {materiasFiltradas.length === 0 && (
-                    <p className="adm-hint">Nenhuma matéria cadastrada para este ciclo.</p>
-                  )}
-                </div>
-              )}
+              <div className="adm-form-group">
+                <label className="adm-label">Matéria</label>
+                {!criarMateria ? (
+                  <div className="adm-cascading-row">
+                    <select className="adm-select" value={materiaId} onChange={e => {
+                      const m = materiais.find(x => x.id === e.target.value);
+                      setMateriaId(e.target.value);
+                      setMateriaNome(m?.nome ?? '');
+                      setTopicId(''); setTopicNome(''); setCriarTopico(false);
+                      setCapituloSelecionado(''); setCriarSubtopic(false); setSubtopicNovaNome('');
+                      setSubSubtopicId(''); setSubSubtopicNome(''); setCriarSubSubtopic(false);
+                    }}>
+                      <option value="">Selecione...</option>
+                      {materiasFiltradas.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                    </select>
+                    {materiaId && (
+                      <input type="number" min={1} className="adm-pos-input"
+                        value={materiaOrdem || ''} onChange={e => setMateriaOrdem(Number(e.target.value))}
+                        placeholder="Pos." title="Posição da matéria na listagem" />
+                    )}
+                    <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                      style={{ whiteSpace: 'nowrap', padding: '0 10px' }}
+                      onClick={() => { setCriarMateria(true); setMateriaId(''); setMateriaNome(''); setCriarTopico(true); setTopicId(''); setTopicNome(''); }}>
+                      + Novo
+                    </button>
+                  </div>
+                ) : (
+                  <div className="adm-cascading-row">
+                    <input className="adm-input" value={materiaNovaNome} onChange={e => setMateriaNovaNome(e.target.value)} placeholder="Nome da nova matéria" autoFocus />
+                    <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                      style={{ padding: '0 10px' }}
+                      onClick={() => { setCriarMateria(false); setMateriaNovaNome(''); setCriarTopico(false); }}>✕</button>
+                  </div>
+                )}
+              </div>
 
               {/* TÓPICO */}
-              {materiaId && (
-                <div className="adm-form-group">
-                  <label className="adm-label">Tópico</label>
-                  {!criarTopico ? (
-                    <div className="adm-cascading-row">
-                      <select className="adm-select" value={topicId} onChange={e => {
-                        setTopicId(e.target.value);
-                        setSubtopicId(''); setSubtopicNome(''); setCriarSubtopic(false);
-                      }}>
-                        <option value="">Selecione...</option>
-                        {topicos.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
-                      </select>
-                      <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
-                        style={{ whiteSpace: 'nowrap', padding: '0 10px' }}
-                        onClick={() => { setCriarTopico(true); setTopicId(''); setTopicNome(''); }}>
-                        + Novo
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="adm-cascading-row">
-                      <input className="adm-input" value={topicNome} onChange={e => setTopicNome(e.target.value)} placeholder="Nome do novo tópico" autoFocus />
+              <div className="adm-form-group">
+                <label className="adm-label">Tópico</label>
+                {!criarTopico && !criarMateria ? (
+                  <div className="adm-cascading-row">
+                    <select className="adm-select" value={topicId} onChange={e => {
+                      setTopicId(e.target.value);
+                      setCapituloSelecionado(''); setCriarSubtopic(false); setSubtopicNovaNome('');
+                      setSubSubtopicId(''); setSubSubtopicNome(''); setCriarSubSubtopic(false);
+                    }}>
+                      <option value="">{materiaId ? 'Selecione...' : 'Selecione uma matéria primeiro'}</option>
+                      {topicos.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
+                    </select>
+                    {topicId && (
+                      <input type="number" min={1} className="adm-pos-input"
+                        value={topicOrdem || ''} onChange={e => setTopicOrdem(Number(e.target.value))}
+                        placeholder="Pos." title="Posição do tópico na listagem" />
+                    )}
+                    <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                      style={{ whiteSpace: 'nowrap', padding: '0 10px' }}
+                      onClick={() => { setCriarTopico(true); setTopicId(''); setTopicNome(''); }}>
+                      + Novo
+                    </button>
+                  </div>
+                ) : (
+                  <div className="adm-cascading-row">
+                    <input className="adm-input" value={topicNome} onChange={e => setTopicNome(e.target.value)} placeholder="Nome do novo tópico" autoFocus={criarTopico && !criarMateria} />
+                    {!criarMateria && (
                       <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
                         style={{ padding: '0 10px' }}
                         onClick={() => { setCriarTopico(false); setTopicNome(''); }}>✕</button>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
+              </div>
 
-              {/* CAPÍTULO */}
-              {materiaId && (topicId || criarTopico) && (
-                <div className="adm-form-group">
-                  <label className="adm-label">Capítulo</label>
-                  {!criarSubtopic ? (
-                    <div className="adm-cascading-row">
-                      <select className="adm-select" value={subtopicId} onChange={e => setSubtopicId(e.target.value)}>
-                        <option value="">Selecione...</option>
-                        {subtopics.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
-                      </select>
-                      <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
-                        style={{ whiteSpace: 'nowrap', padding: '0 10px' }}
-                        onClick={() => { setCriarSubtopic(true); setSubtopicId(''); setSubtopicNome(''); }}>
-                        + Novo
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="adm-cascading-row" style={{ marginBottom: '6px' }}>
-                        <input className="adm-input" value={subtopicNome} onChange={e => setSubtopicNome(e.target.value)} placeholder="Nome do capítulo" autoFocus />
-                        <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
-                          style={{ padding: '0 10px' }}
-                          onClick={() => { setCriarSubtopic(false); setSubtopicNome(''); }}>✕</button>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <label className="adm-label" style={{ margin: 0, whiteSpace: 'nowrap' }}>Ordem:</label>
-                        <input className="adm-input" type="number" min="1" value={subtopicOrdem}
-                          onChange={e => setSubtopicOrdem(parseInt(e.target.value) || 1)}
-                          style={{ width: '70px' }} />
-                        <span className="adm-hint" style={{ margin: 0 }}>
-                          {subtopics.length > 0 ? `(${subtopics.length} existentes)` : '(primeiro)'}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+              {/* SUBTÓPICO */}
+              <div className="adm-form-group">
+                <label className="adm-label">Subtópico</label>
+                {criarTopico ? (
+                  <input className="adm-input" value={subtopicNovaNome} onChange={e => setSubtopicNovaNome(e.target.value)} placeholder="Subtópico (opcional)" />
+                ) : !criarSubtopic ? (
+                  <div className="adm-cascading-row">
+                    <select className="adm-select" value={capituloSelecionado} onChange={e => {
+                      setCapituloSelecionado(e.target.value);
+                      setSubSubtopicId(''); setSubSubtopicNome(''); setCriarSubSubtopic(false);
+                    }}>
+                      <option value="">{topicId ? 'Selecione...' : 'Selecione um tópico primeiro'}</option>
+                      {subtopics.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                    </select>
+                    {capituloSelecionado && (
+                      <input type="number" min={1} className="adm-pos-input"
+                        value={subtopicOrdem || ''} onChange={e => setSubtopicOrdem(Number(e.target.value))}
+                        placeholder="Pos." title="Posição do subtópico na listagem" />
+                    )}
+                    <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                      style={{ whiteSpace: 'nowrap', padding: '0 10px' }}
+                      onClick={() => { setCriarSubtopic(true); setCapituloSelecionado(''); setSubSubtopicId(''); setSubSubtopicNome(''); setCriarSubSubtopic(false); }}>
+                      + Novo
+                    </button>
+                  </div>
+                ) : (
+                  <div className="adm-cascading-row">
+                    <input className="adm-input" value={subtopicNovaNome} onChange={e => setSubtopicNovaNome(e.target.value)} placeholder="Nome do subtópico" autoFocus />
+                    <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                      style={{ padding: '0 10px' }}
+                      onClick={() => { setCriarSubtopic(false); setSubtopicNovaNome(''); }}>✕</button>
+                  </div>
+                )}
+              </div>
+
+              {/* SUB-SUBTÓPICO */}
+              <div className="adm-form-group">
+                <label className="adm-label">Sub-subtópico <span style={{ fontWeight: 400, color: 'var(--text-muted)', textTransform: 'none' }}>(opcional)</span></label>
+                {criarTopico || criarSubtopic ? (
+                  <input className="adm-input" value={subSubtopicNome} onChange={e => setSubSubtopicNome(e.target.value)} placeholder="Sub-subtópico (opcional)" />
+                ) : !criarSubSubtopic ? (
+                  <div className="adm-cascading-row">
+                    <select className="adm-select" value={subSubtopicId} onChange={e => setSubSubtopicId(e.target.value)}>
+                      <option value="">Nenhum</option>
+                      {subSubtopics.map(ss => <option key={ss.id} value={ss.id}>{ss.nome}</option>)}
+                    </select>
+                    {subSubtopicId && (
+                      <input type="number" min={1} className="adm-pos-input"
+                        value={subSubtopicOrdem || ''} onChange={e => setSubSubtopicOrdem(Number(e.target.value))}
+                        placeholder="Pos." title="Posição do sub-subtópico na listagem" />
+                    )}
+                    <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                      style={{ whiteSpace: 'nowrap', padding: '0 10px' }}
+                      onClick={() => { setCriarSubSubtopic(true); setSubSubtopicId(''); setSubSubtopicNome(''); }}>
+                      + Novo
+                    </button>
+                  </div>
+                ) : (
+                  <div className="adm-cascading-row">
+                    <input className="adm-input" value={subSubtopicNome} onChange={e => setSubSubtopicNome(e.target.value)} placeholder="Nome do sub-subtópico" autoFocus />
+                    <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm"
+                      style={{ padding: '0 10px' }}
+                      onClick={() => { setCriarSubSubtopic(false); setSubSubtopicNome(''); }}>✕</button>
+                  </div>
+                )}
+              </div>
 
               {/* STATUS */}
               <div className="adm-form-group" style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid var(--border)' }}>
