@@ -1,0 +1,810 @@
+{
+  "etiology": [
+    {
+      "q": "O que a etiologia procura explicar?",
+      "a": "A etiologia procura identificar por que a doença surgiu, isto é, quais causas, exposições, predisposições ou combinações de fatores participaram do seu início.",
+      "track": "Base"
+    },
+    {
+      "q": "O que a patogênese procura explicar?",
+      "a": "A patogênese descreve como a doença se desenvolve desde o estímulo inicial até as alterações moleculares, celulares, teciduais e clínicas.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual é a diferença essencial entre etiologia e patogênese?",
+      "a": "Etiologia responde por que começou. Patogênese responde como evoluiu. Em uma questão, a causa não deve ser confundida com o mecanismo produzido por ela.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é um fator de risco?",
+      "a": "É uma característica, condição ou exposição associada a maior probabilidade de uma doença ou desfecho. Ele não precisa ser causa única nem suficiente.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é susceptibilidade do hospedeiro?",
+      "a": "É a vulnerabilidade individual decorrente de idade, genética, imunidade, nutrição, comorbidades e outros fatores que modificam a resposta a uma exposição.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é um gatilho em uma cadeia causal?",
+      "a": "É o evento próximo que precipita a manifestação aguda de uma doença já favorecida por fatores de risco ou por uma doença de base.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é a doença de base em um raciocínio etiológico?",
+      "a": "É o processo patológico já instalado que cria o cenário para o evento agudo, como a aterosclerose antes da trombose coronariana.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é consequência em uma cadeia causal?",
+      "a": "É o dano ou desfecho produzido pelo mecanismo, como isquemia, necrose, falência de órgão ou manifestação clínica.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual é a diferença entre fator de risco modificável e não modificável?",
+      "a": "O modificável pode ser reduzido ou controlado, como tabagismo e hipertensão. O não modificável não pode ser eliminado, como idade, sexo biológico e parte da carga genética.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que significa dizer que uma doença é multifatorial?",
+      "a": "Significa que ela resulta da interação entre vários componentes, geralmente predisposição genética, ambiente, comportamento, tempo de exposição e fatores protetores.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é interação gene-ambiente?",
+      "a": "É quando o efeito de uma exposição depende da susceptibilidade genética, ou quando uma predisposição genética se manifesta de modo diferente conforme o ambiente.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é causa necessária?",
+      "a": "É um fator que precisa estar presente para que determinado processo ocorra, embora sozinho possa não ser suficiente para produzir a doença.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é causa suficiente?",
+      "a": "É uma condição ou conjunto de componentes capaz de produzir a doença. Em doenças complexas, raramente um único fator isolado é suficiente.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é uma causa componente?",
+      "a": "É uma parte da combinação causal. Ela contribui para o adoecimento, mas precisa atuar junto de outros fatores para completar o mecanismo.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que significa idiopático?",
+      "a": "Significa que a causa não foi identificada com o conhecimento e a investigação disponíveis. Não significa que a doença não tenha causa.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que significa iatrogênico?",
+      "a": "Significa que a condição decorreu de uma intervenção diagnóstica ou terapêutica. Iatrogenia não é sinônimo automático de negligência ou erro médico.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Como diferenciar doença genética de doença hereditária?",
+      "a": "Genética envolve alteração no material genético. Hereditária é a alteração genética transmitida pela linhagem germinativa aos descendentes. Nem toda doença genética é herdada.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como diferenciar congênito de hereditário?",
+      "a": "Congênito significa presente ao nascimento. Pode resultar de mutação, alteração cromossômica, infecção, droga ou outro fator intrauterino, sem obrigatoriamente ser hereditário.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Por que associação estatística não prova causalidade?",
+      "a": "Porque a associação pode resultar de acaso, viés, causalidade reversa ou fator de confusão. É preciso coerência temporal, biológica e epidemiológica.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Por que a temporalidade é indispensável para atribuir causalidade?",
+      "a": "A exposição precisa ocorrer antes do desfecho. Um achado presente apenas depois da doença pode ser consequência, e não causa.",
+      "track": "Enamed"
+    },
+    {
+      "q": "O que é latência?",
+      "a": "É o intervalo entre a exposição causal e a manifestação clínica. Neoplasias ocupacionais e doenças crônicas podem aparecer anos ou décadas depois.",
+      "track": "Enamed"
+    },
+    {
+      "q": "O que é relação dose-resposta?",
+      "a": "É a tendência de maior intensidade, duração ou quantidade de exposição produzir maior risco ou maior gravidade, reforçando a plausibilidade causal.",
+      "track": "Enamed"
+    },
+    {
+      "q": "O que é fator de confusão?",
+      "a": "É uma variável associada à exposição e ao desfecho que pode criar, esconder ou distorcer a relação observada entre ambos.",
+      "track": "Enamed"
+    },
+    {
+      "q": "O que é um fator protetor?",
+      "a": "É uma característica ou intervenção associada à redução da probabilidade de doença ou à atenuação do efeito de fatores de risco.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como organizar a cadeia causal de um infarto do miocárdio?",
+      "a": "Primeiro aparecem riscos crônicos, como tabagismo, hipertensão e dislipidemia. Depois surge aterosclerose. A ruptura da placa é o gatilho, a trombose é o mecanismo imediato e a isquemia persistente produz necrose.",
+      "track": "Residência"
+    },
+    {
+      "q": "Em uma questão sobre tabagismo e infarto, por que o tabagismo não deve ser chamado de trombo?",
+      "a": "Porque tabagismo é fator de risco crônico. O trombo é o mecanismo imediato que oclui a artéria após a instabilidade da placa.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como interpretar uma mutação em BRCA em uma questão clínica?",
+      "a": "A mutação aumenta susceptibilidade e risco, mas não determina que o câncer ocorrerá. Outros eventos somáticos e ambientais participam da carcinogênese.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como interpretar a infecção persistente por HPV no carcinoma cervical?",
+      "a": "A persistência de tipos oncogênicos é um componente causal central, mas progressão depende de persistência, alterações celulares, cofatores e falha de controle imune.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como pensar em uma doença ocupacional com longa latência?",
+      "a": "Identifique a exposição antiga, confirme se ela precedeu a doença, relacione o órgão-alvo e não descarte a etiologia apenas porque o contato terminou há anos.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como distinguir efeito adverso esperado de iatrogenia?",
+      "a": "Um efeito adverso previsto de tratamento ainda pode ser iatrogênico, porque decorre da intervenção. A classificação não depende de ter havido erro.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como pensar em infecção quando exposição semelhante causa doença apenas em alguns pacientes?",
+      "a": "Considere dose do agente, porta de entrada, virulência e susceptibilidade do hospedeiro, incluindo idade, imunidade, barreiras e comorbidades.",
+      "track": "Residência"
+    },
+    {
+      "q": "Qual é o roteiro mais seguro para resolver uma questão etiológica complexa?",
+      "a": "Classifique cada pista como predisposição, fator de risco, doença de base, gatilho, mecanismo ou consequência. Depois escolha a alternativa que preserva a ordem causal.",
+      "track": "Residência"
+    },
+    {
+      "q": "Pegadinha: fator de risco significa que a doença obrigatoriamente ocorrerá?",
+      "a": "Não. Fator de risco aumenta probabilidade. A ocorrência depende da combinação com outros fatores, do tempo e da susceptibilidade individual.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: idiopático significa sem causa?",
+      "a": "Não. Significa causa ainda não identificada. A ausência de explicação disponível não equivale à ausência de mecanismo biológico.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: toda doença congênita é hereditária?",
+      "a": "Não. Infecções maternas, fármacos, álcool, hipóxia e alterações de desenvolvimento podem produzir doença congênita sem transmissão hereditária.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: toda doença genética é transmitida aos filhos?",
+      "a": "Não. Mutações somáticas podem causar doença no indivíduo sem estar presentes nos gametas e sem serem transmitidas.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: um biomarcador associado à doença é necessariamente sua causa?",
+      "a": "Não. Ele pode ser consequência, marcador de gravidade ou fenômeno paralelo. A questão deve demonstrar participação causal, não apenas associação.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: o gatilho agudo e a doença de base são a mesma coisa?",
+      "a": "Não. A doença de base prepara o terreno; o gatilho precipita o evento. Na aterosclerose, a placa é a base e sua ruptura é o gatilho.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: fatores de risco agem sempre de forma apenas aditiva?",
+      "a": "Não. Alguns interagem e ampliam o risco de modo multiplicativo, como ocorre com combinações de fatores cardiovasculares.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: a alternativa com mais detalhes é sempre a correta?",
+      "a": "Não. Em prova médica, avalie a coerência causal. Uma alternativa longa pode misturar conceitos corretos em ordem errada para parecer convincente.",
+      "track": "Pegadinhas"
+    }
+  ],
+  "pathogenesis": [
+    {
+      "q": "O que é patogênese?",
+      "a": "É a sequência de eventos celulares, bioquímicos e moleculares que liga o estímulo inicial às alterações estruturais, funcionais e clínicas.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual pergunta a patogênese responde?",
+      "a": "Como a doença se desenvolveu desde a causa até a lesão e a manifestação no paciente.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual a diferença entre etiologia e patogênese?",
+      "a": "Etiologia explica por que começou; patogênese explica como progrediu.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual a ordem básica da cadeia patogenética?",
+      "a": "Estímulo → alvo molecular → resposta celular → alteração tecidual → disfunção do órgão → manifestação clínica.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é um evento upstream?",
+      "a": "Uma etapa próxima do início da cadeia que influencia eventos posteriores.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é um evento downstream?",
+      "a": "Uma etapa mais próxima da manifestação, complicação ou desfecho final.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é alvo molecular?",
+      "a": "Proteína, receptor, enzima, membrana, organela ou via diretamente atingida pelo estímulo.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é resposta celular?",
+      "a": "Adaptação, ativação, inflamação, disfunção, lesão ou morte produzida na célula.",
+      "track": "Base"
+    },
+    {
+      "q": "O que é um mediador?",
+      "a": "Molécula que transmite, amplifica ou executa parte da resposta patológica.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é amplificação?",
+      "a": "Aumento progressivo da resposta quando uma etapa recruta outras vias, células ou mediadores.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é feedback positivo?",
+      "a": "Quando o resultado reforça o próprio mecanismo e sustenta ou agrava a doença.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é feedback negativo?",
+      "a": "Resposta que reduz a via ativa e favorece controle ou retorno à homeostase.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é latência?",
+      "a": "Intervalo entre o estímulo inicial e a detecção clínica ou laboratorial da doença.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é susceptibilidade do hospedeiro?",
+      "a": "Conjunto de características que modifica a resposta ao mesmo estímulo, como idade, genética, imunidade e comorbidades.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Por que a mesma causa pode gerar doenças diferentes?",
+      "a": "Porque tecido, dose, duração, via de entrada e resposta do hospedeiro alteram a cadeia.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é via final comum?",
+      "a": "Mecanismo em que causas diferentes convergem para a mesma resposta celular, lesão ou disfunção.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Como diferenciar morfologia de patogênese?",
+      "a": "Morfologia mostra a alteração estrutural; patogênese explica o mecanismo que a produziu.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como diferenciar fisiopatologia de patogênese?",
+      "a": "Patogênese descreve a progressão; fisiopatologia explica como a alteração causa disfunção e sintomas.",
+      "track": "Enamed"
+    },
+    {
+      "q": "O que é uma complicação?",
+      "a": "Evento adverso downstream que surge durante a evolução de uma doença já instalada.",
+      "track": "Enamed"
+    },
+    {
+      "q": "O que é história natural?",
+      "a": "Evolução temporal desde fases iniciais até resolução, cronicidade, complicações ou morte.",
+      "track": "Enamed"
+    },
+    {
+      "q": "O que significa ponto de não retorno?",
+      "a": "Momento em que a célula não consegue recuperar homeostase mesmo após retirada do estímulo.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como reconhecer lesão reversível?",
+      "a": "Há disfunção e alterações celulares, mas a homeostase pode retornar se o estímulo for removido a tempo.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como reconhecer lesão irreversível?",
+      "a": "Há falha não recuperável de estruturas essenciais e progressão para morte celular.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como um biomarcador entra na cadeia?",
+      "a": "Pode indicar ativação de via, dano celular, disfunção do órgão ou resposta do hospedeiro.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Por que biomarcador não é automaticamente causa?",
+      "a": "Porque pode ser consequência ou marcador paralelo sem executar o mecanismo.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como a patogênese orienta tratamento?",
+      "a": "Identifica etapas críticas e alvos cuja modulação pode interromper a progressão.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como a patogênese orienta prevenção?",
+      "a": "Mostra os eventos precoces que podem ser evitados antes de dano irreversível.",
+      "track": "Residência"
+    },
+    {
+      "q": "Por que morfologia semelhante pode esconder doenças diferentes?",
+      "a": "Porque mecanismos moleculares distintos podem convergir para aparência estrutural parecida.",
+      "track": "Residência"
+    },
+    {
+      "q": "Qual regra temporal elimina alternativas erradas?",
+      "a": "A causa e o gatilho devem ocorrer antes do mecanismo, e o mecanismo antes da lesão e da manifestação.",
+      "track": "Residência"
+    },
+    {
+      "q": "Por que a patogênese pode ser uma rede?",
+      "a": "Porque há vias paralelas, redundância, amplificação e ciclos de feedback.",
+      "track": "Residência"
+    },
+    {
+      "q": "O que é plausibilidade biológica?",
+      "a": "Coerência do mecanismo com o tecido, a célula, a temporalidade e o conhecimento biomédico.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como pensar no infarto?",
+      "a": "Placa rota → trombo → isquemia → queda de ATP → necrose → troponina e sintomas.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como pensar no abscesso?",
+      "a": "Agente infeccioso → recrutamento de neutrófilos → enzimas e liquefação → pus e dano local.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Como pensar na sepse?",
+      "a": "Infecção → resposta sistêmica desregulada → endotélio/coagulação alterados → hipoperfusão → falência de órgãos.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Como pensar no edema cardíaco?",
+      "a": "Falha de bomba → pressão venosa elevada → saída de líquido → edema.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Como pensar no edema por hipoalbuminemia?",
+      "a": "Perda de proteína → pressão oncótica reduzida → líquido no interstício → edema.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Como pensar na doença autoimune?",
+      "a": "Resposta imune contra alvo próprio → alteração funcional ou destruição → disfunção do órgão.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Como pensar na toxicidade?",
+      "a": "Agente → alvo ou metabólito reativo → defesa insuficiente → lesão celular.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Como pensar em neoplasia multietápica?",
+      "a": "Alterações sucessivas e seleção clonal produzem progressão, heterogeneidade e comportamento maligno.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Qual frase ajuda a gabaritar patogênese?",
+      "a": "Não pule a ponte: identifique o que iniciou, o que mudou na célula, o que aconteceu no tecido e como isso apareceu no paciente.",
+      "track": "Pegadinhas"
+    }
+  ],
+  "pathology": [
+    {
+      "q": "O que caracteriza necrose?",
+      "a": "Morte celular associada a dano de membranas, extravasamento do conteúdo celular, digestão enzimática e resposta inflamatória.",
+      "track": "Base"
+    },
+    {
+      "q": "O que caracteriza apoptose?",
+      "a": "Morte celular regulada, com retração celular, condensação da cromatina, fragmentação em corpos apoptóticos e rápida fagocitose.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual é a diferença central da membrana na necrose e na apoptose?",
+      "a": "Na necrose há perda de integridade e extravasamento. Na apoptose, os fragmentos permanecem delimitados por membrana até serem removidos.",
+      "track": "Base"
+    },
+    {
+      "q": "Por que a necrose costuma causar inflamação?",
+      "a": "Porque componentes intracelulares liberados funcionam como sinais de perigo e ativam a resposta inflamatória do hospedeiro.",
+      "track": "Base"
+    },
+    {
+      "q": "Por que a apoptose costuma gerar pouca inflamação?",
+      "a": "Porque o conteúdo permanece contido e os corpos apoptóticos são reconhecidos e fagocitados rapidamente.",
+      "track": "Base"
+    },
+    {
+      "q": "Como muda o tamanho celular na necrose e na apoptose?",
+      "a": "Na necrose, a célula tende a inchar. Na apoptose, ela se retrai e fica menor.",
+      "track": "Base"
+    },
+    {
+      "q": "Quais alterações nucleares aparecem na necrose?",
+      "a": "Picnose, cariorrexe e cariólise, representando condensação, fragmentação e dissolução nuclear.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual é o papel das caspases na apoptose?",
+      "a": "Caspases iniciadoras ativam caspases executoras, que degradam proteínas celulares e organizam a desmontagem controlada da célula.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual padrão de necrose é típico do infarto em órgãos sólidos?",
+      "a": "Necrose coagulativa, com exceção do sistema nervoso central.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Qual padrão de necrose é típico do infarto cerebral?",
+      "a": "Necrose liquefativa, porque a digestão enzimática predomina no tecido nervoso.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Qual padrão de necrose é típico de abscessos bacterianos?",
+      "a": "Necrose liquefativa, associada à digestão do tecido por enzimas de leucócitos e microrganismos.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Qual padrão de necrose é classicamente associado à tuberculose?",
+      "a": "Necrose caseosa, com material friável e amorfo geralmente no centro de granulomas.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Qual padrão de necrose pode ocorrer na pancreatite aguda?",
+      "a": "Necrose gordurosa enzimática, com liberação de lipases, destruição de adipócitos e saponificação.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Qual padrão de necrose aparece na parede de vasos em vasculites?",
+      "a": "Necrose fibrinoide, com depósito de material intensamente eosinofílico na parede vascular.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Gangrena é um padrão microscópico específico?",
+      "a": "Não. É um termo clínico. Gangrena seca costuma refletir necrose coagulativa; infecção sobreposta pode produzir liquefação e gangrena úmida.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "A apoptose pode ser fisiológica e patológica?",
+      "a": "Sim. É fisiológica na remodelação e renovação celular; é patológica quando elimina células com dano ao DNA, proteínas mal dobradas ou infecção.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Qual achado em um infarto do miocárdio favorece necrose coagulativa?",
+      "a": "Preservação temporária da arquitetura tecidual, citoplasma mais eosinofílico, perda nuclear e inflamação subsequente.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Por que troponina aumenta no infarto?",
+      "a": "A perda da integridade da membrana de cardiomiócitos necróticos permite liberação de proteínas intracelulares para a circulação.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como reconhecer necrose liquefativa em um caso de AVC isquêmico?",
+      "a": "O enunciado combina isquemia cerebral, digestão do tecido e formação posterior de cavidade.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como a saponificação ajuda a reconhecer necrose gordurosa?",
+      "a": "Ácidos graxos liberados ligam-se ao cálcio e formam depósitos calcários, podendo contribuir para hipocalcemia.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como diferenciar apoptose de necrose em uma lâmina?",
+      "a": "Apoptose mostra células isoladas retraídas e corpos apoptóticos; necrose costuma envolver grupos celulares, ruptura e inflamação.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Qual via de apoptose é ativada por dano ao DNA e falta de fatores de crescimento?",
+      "a": "A via intrínseca ou mitocondrial, regulada por proteínas da família BCL-2 e liberação de citocromo c.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Qual via de apoptose é ativada por receptores de morte?",
+      "a": "A via extrínseca, iniciada por receptores como Fas e receptores de TNF, com ativação de caspases iniciadoras.",
+      "track": "Enamed"
+    },
+    {
+      "q": "O que acontece com a cromatina na apoptose?",
+      "a": "Ela se condensa de forma intensa e se fragmenta, formando material nuclear dentro de corpos apoptóticos.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Qual é o papel das proteínas antiapoptóticas BCL-2 e BCL-XL?",
+      "a": "Elas preservam a integridade mitocondrial e dificultam a liberação de proteínas que ativariam a cascata de caspases.",
+      "track": "Residência"
+    },
+    {
+      "q": "Qual é o papel de BAX e BAK na apoptose?",
+      "a": "São proteínas pró-apoptóticas que aumentam a permeabilidade da membrana mitocondrial e favorecem liberação de citocromo c.",
+      "track": "Residência"
+    },
+    {
+      "q": "O que é necroptose?",
+      "a": "É uma forma regulada de morte com morfologia de necrose, geralmente independente de caspases e mediada por proteínas como RIPK.",
+      "track": "Residência"
+    },
+    {
+      "q": "O que é piroptose?",
+      "a": "É uma morte celular inflamatória associada à ativação do inflamassoma e de caspases inflamatórias, frequentemente em resposta a infecções.",
+      "track": "Residência"
+    },
+    {
+      "q": "Por que uma agressão intensa pode favorecer necrose em vez de apoptose?",
+      "a": "A apoptose exige energia e organização molecular. Queda intensa de ATP e dano grave de membranas favorecem necrose.",
+      "track": "Residência"
+    },
+    {
+      "q": "Necrose e apoptose podem coexistir no mesmo tecido?",
+      "a": "Sim. A intensidade da agressão, o tipo celular, a disponibilidade de ATP e as vias ativadas podem produzir sobreposição.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como a falha de apoptose pode contribuir para câncer?",
+      "a": "Células com dano genético deixam de ser eliminadas, sobrevivem e acumulam alterações que favorecem transformação neoplásica.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como a apoptose excessiva pode participar de doença?",
+      "a": "Pode causar perda de células funcionais em doenças neurodegenerativas, lesão isquêmica e algumas infecções.",
+      "track": "Residência"
+    },
+    {
+      "q": "Pegadinha: todo infarto produz necrose coagulativa?",
+      "a": "Não. O encéfalo é a exceção clássica e evolui com necrose liquefativa.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: apoptose é sempre fisiológica?",
+      "a": "Não. Também ocorre em dano irreparável ao DNA, acúmulo de proteínas mal dobradas e certas infecções.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: necrose caseosa é sinônimo de qualquer granuloma?",
+      "a": "Não. Granulomas podem ser não caseosos, como ocorre tipicamente na sarcoidose.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: gangrena úmida é apenas necrose coagulativa?",
+      "a": "Não. Há necrose isquêmica com infecção bacteriana e liquefação sobreposta.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: presença de caspases significa necessariamente apoptose não inflamatória?",
+      "a": "Não. Caspases também participam de vias inflamatórias, como a piroptose.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: membrana íntegra significa célula viva?",
+      "a": "Não. Na apoptose, fragmentos celulares podem permanecer delimitados por membrana mesmo após a célula ter iniciado a morte.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: eosinofilia citoplasmática isolada define necrose?",
+      "a": "Não. Deve ser interpretada com perda nuclear, contexto de lesão e alterações teciduais, porque não é um achado exclusivo.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Qual regra ajuda a gabaritar questões sobre morte celular?",
+      "a": "Primeiro identifique o órgão e a agressão; depois avalie membrana, inflamação, morfologia nuclear e padrão tecidual.",
+      "track": "Pegadinhas"
+    }
+  ],
+  "ascaris": [
+    {
+      "q": "O que é Ascaris lumbricoides?",
+      "a": "É um nematódeo intestinal de corpo cilíndrico que causa ascaridíase.",
+      "track": "Base"
+    },
+    {
+      "q": "Onde vive o verme adulto?",
+      "a": "No intestino delgado do hospedeiro humano.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual é a forma infectante para o ser humano?",
+      "a": "O ovo embrionado contendo larva infectante, adquirido por ingestão.",
+      "track": "Base"
+    },
+    {
+      "q": "Como ocorre a transmissão?",
+      "a": "Pela ingestão fecal-oral de ovos embrionados presentes em solo, água, alimentos ou mãos contaminadas.",
+      "track": "Base"
+    },
+    {
+      "q": "O ovo eliminado nas fezes já é imediatamente infectante?",
+      "a": "Não. Ele precisa embrionar no ambiente até conter a larva infectante.",
+      "track": "Base"
+    },
+    {
+      "q": "Ascaris penetra ativamente pela pele?",
+      "a": "Não. A entrada ocorre pela boca, por ingestão de ovos embrionados.",
+      "track": "Base"
+    },
+    {
+      "q": "Ascaris precisa de hospedeiro intermediário?",
+      "a": "Não. É um geo-helminto de ciclo direto, com maturação dos ovos no ambiente.",
+      "track": "Base"
+    },
+    {
+      "q": "Qual forma costuma ser encontrada no exame de fezes?",
+      "a": "Ovos produzidos por fêmeas adultas presentes no intestino.",
+      "track": "Base"
+    },
+    {
+      "q": "Onde o ovo infectante eclode?",
+      "a": "No intestino delgado, liberando a larva que atravessa a mucosa.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Qual é a sequência principal da migração larvária?",
+      "a": "Intestino, circulação portal, fígado, coração direito, pulmões, árvore brônquica, deglutição e retorno ao intestino.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que a larva faz ao chegar aos pulmões?",
+      "a": "Atravessa capilares e alvéolos, sobe pelas vias respiratórias, alcança a faringe e é deglutida.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O verme adulto vive nos pulmões?",
+      "a": "Não. Apenas a larva migra pelos pulmões; o adulto vive no intestino delgado.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "O que é a síndrome de Löeffler?",
+      "a": "Quadro pulmonar transitório com tosse, infiltrados migratórios e eosinofilia durante a migração larvária.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Por que pode haver eosinofilia?",
+      "a": "Porque a passagem larvária pelos tecidos induz resposta imune típica contra helmintos.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Qual é o diagnóstico parasitológico clássico?",
+      "a": "Identificação de ovos característicos no exame parasitológico de fezes.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Por que o exame de fezes pode ser negativo na fase pulmonar inicial?",
+      "a": "Porque ainda não há vermes adultos férteis no intestino produzindo ovos.",
+      "track": "Faculdade"
+    },
+    {
+      "q": "Criança com tosse, eosinofilia e infiltrado pulmonar transitório sugere qual fase?",
+      "a": "A fase de migração larvária pulmonar da ascaridíase.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Qual complicação intestinal é mais clássica em carga parasitária elevada?",
+      "a": "Obstrução intestinal por massa de vermes, sobretudo em crianças.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Que sintomas podem ocorrer na fase intestinal?",
+      "a": "Dor abdominal, náuseas, distensão e alterações nutricionais, embora infecções leves possam ser assintomáticas.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Que complicação ocorre quando vermes adultos migram para as vias biliares?",
+      "a": "Podem causar cólica biliar, colangite, colecistite ou obstrução biliar.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Como Ascaris pode causar pancreatite?",
+      "a": "Pela migração do verme adulto para a região da ampola ou para o ducto pancreático.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Em obstrução intestinal por Ascaris, qual pista epidemiológica ajuda?",
+      "a": "Criança de área com saneamento precário, dor abdominal, distensão e história de eliminação de vermes.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Qual achado diferencia ascaridíase de ancilostomíase quanto à entrada?",
+      "a": "Ascaris é adquirido pela ingestão de ovos; ancilostomídeos entram pela penetração cutânea de larvas filariformes.",
+      "track": "Enamed"
+    },
+    {
+      "q": "Qual achado diferencia Ascaris de Taenia quanto à transmissão?",
+      "a": "Ascaris é adquirido por ovos do ambiente; teníase ocorre pela ingestão de cisticercos em carne malcozida.",
+      "track": "Enamed"
+    },
+    {
+      "q": "A eosinofilia é mais esperada em qual momento da ascaridíase?",
+      "a": "Durante a fase tecidual e pulmonar, quando as larvas migram; pode ser menos marcante na fase intestinal crônica.",
+      "track": "Residência"
+    },
+    {
+      "q": "Ascaris produz autoinfecção interna como Strongyloides?",
+      "a": "Não. A manutenção da infecção depende de nova ingestão de ovos embrionados do ambiente.",
+      "track": "Residência"
+    },
+    {
+      "q": "A presença de verme adulto nas fezes exclui complicações biliares?",
+      "a": "Não. Vermes adultos podem migrar de forma errática e alcançar ductos biliares ou pancreáticos.",
+      "track": "Residência"
+    },
+    {
+      "q": "Como interpretar ovos ausentes nas fezes em paciente com verme macho único?",
+      "a": "A infecção pode existir sem eliminação de ovos quando não há fêmea fértil; o diagnóstico deve considerar o contexto.",
+      "track": "Residência"
+    },
+    {
+      "q": "Que medidas são centrais para prevenção?",
+      "a": "Saneamento, destino adequado das fezes, água segura, higiene das mãos e lavagem adequada de alimentos.",
+      "track": "Residência"
+    },
+    {
+      "q": "Quais fármacos são usados com frequência no tratamento não complicado?",
+      "a": "Benzimidazóis como albendazol ou mebendazol são opções usuais, conforme protocolo e avaliação clínica.",
+      "track": "Residência"
+    },
+    {
+      "q": "Por que tratar apenas o indivíduo não elimina o problema populacional?",
+      "a": "Porque ovos persistem no ambiente e a reinfecção ocorre enquanto houver contaminação fecal e saneamento inadequado.",
+      "track": "Residência"
+    },
+    {
+      "q": "Qual roteiro resolve a maioria das questões sobre helmintos intestinais?",
+      "a": "Identifique forma infectante, porta de entrada, migração, local do adulto, forma diagnóstica e complicação típica.",
+      "track": "Residência"
+    },
+    {
+      "q": "Pegadinha: a forma infectante é uma larva livre no solo?",
+      "a": "Não. Em Ascaris, a larva infectante está dentro do ovo embrionado ingerido.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: todo helminto com fase pulmonar entra pela pele?",
+      "a": "Não. Ascaris faz migração pulmonar após ingestão de ovos; ancilostomídeos e Strongyloides entram pela pele.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: tosse com eosinofilia confirma exclusivamente Ascaris?",
+      "a": "Não. A síndrome eosinofílica pulmonar pode ocorrer com outros helmintos; o ciclo e a epidemiologia definem o diagnóstico.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: exame de fezes negativo exclui ascaridíase?",
+      "a": "Não. Pode estar negativo na fase pré-patente, em infecção apenas por machos ou com baixa eliminação de ovos.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: o verme adulto causa a síndrome pulmonar?",
+      "a": "Não. A síndrome pulmonar decorre da migração larvária; os adultos ficam no intestino.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: Ascaris usa mosquito como vetor?",
+      "a": "Não. Não há vetor biológico; a transmissão é fecal-oral por ovos presentes no ambiente.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Pegadinha: tratar uma vez impede nova infecção?",
+      "a": "Não. O tratamento elimina parasitos presentes, mas não gera proteção contra nova ingestão de ovos.",
+      "track": "Pegadinhas"
+    },
+    {
+      "q": "Qual frase ajuda a gabaritar questões de Ascaris?",
+      "a": "O ovo entra pela boca, a larva passa pelo pulmão, o adulto mora no intestino e o ovo aparece nas fezes.",
+      "track": "Pegadinhas"
+    }
+  ]
+}

@@ -1,8 +1,4 @@
 {
-  "crons": [
-    {"path": "/api/cron/send-reminders", "schedule": "0 11 * * *"},
-    {"path": "/api/cron/manutencao-revisoes", "schedule": "0 0 * * *"}
-  ],
   "build": {
     "env": {
       "NEXT_PUBLIC_SUPABASE_URL": "https://skkkflsymttfwsplfpab.supabase.co",

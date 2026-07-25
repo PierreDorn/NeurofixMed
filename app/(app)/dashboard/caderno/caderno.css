@@ -1,0 +1,704 @@
+/* Bloco de notas NeuroFix — estilo iPhone Notes com paleta NeuroFix (ouro + azul).
+   Estilos internos do conteúdo (aula/resumo/questões/flashcards) extraídos do mock. */
+
+.cad-wrap {
+  --cad-bg: #050505;
+  --cad-panel: #0F131C;
+  --cad-panel-2: #161B27;
+  --cad-line: rgba(201,168,76,0.16);
+  --cad-line-soft: rgba(255,255,255,0.06);
+  --cad-gold: #C9A84C;
+  --cad-gold-soft: #E8D08A;
+  --cad-blue: #4AB3FF;
+  --cad-blue-soft: #87BDFF;
+  --cad-blueLine: rgba(74,179,255,0.28);
+  --cad-goldLine: rgba(201,168,76,0.28);
+  --cad-white: #F0EDE6;
+  --cad-muted: #A9ADB6;
+  --cad-muted2: #7D8492;
+
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  color: var(--cad-white);
+  padding: 28px 32px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(30,60,110,.20), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 80% 10%, rgba(201,168,76,.05), transparent 70%),
+    linear-gradient(180deg, #070B14, #060912 55%, #05080F);
+  position: relative;
+}
+/* Grid sutil de fundo — sinal visual "cockpit premium" */
+.cad-wrap::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(201,168,76,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 55% at 50% 30%, #000 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 30%, #000 0%, transparent 75%);
+  opacity: .55;
+  z-index: 0;
+}
+.cad-wrap > * { position: relative; z-index: 1; }
+
+/* ── Slot do bloco de notas dentro da Sidebar ── */
+.cad-sidebar-slot {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+.cad-tree { display: flex; flex-direction: column; gap: 4px; }
+.cad-tree-title {
+  padding: 12px 10px 8px;
+  color: #E8D08A;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: .85;
+}
+.cad-inicio-sb {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #050505;
+  background: linear-gradient(135deg,#8B6914 0%,#E8D08A 40%,#C9A84C 75%,#8B6914 100%);
+  background-size: 250% 250%;
+  box-shadow: 0 6px 24px rgba(201,168,76,.32);
+  animation: cadGoldS 4s ease-in-out infinite;
+  cursor: default;
+  margin-bottom: 8px;
+  width: 100%;
+}
+.cad-inicio-sb:hover { transform: translateY(-1px); }
+.cad-inicio-sb svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ── (LEGADO) Botão Início central — mantido para casos futuros ── */
+.cad-inicio-wrap { margin-bottom: 22px; }
+.cad-inicio {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 13px 26px;
+  border-radius: 12px;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #050505;
+  background: linear-gradient(135deg,#8B6914 0%,#E8D08A 40%,#C9A84C 75%,#8B6914 100%);
+  background-size: 250% 250%;
+  box-shadow: 0 6px 24px rgba(201,168,76,.35);
+  animation: cadGoldS 4s ease-in-out infinite;
+  cursor: default;
+  transition: transform .2s, box-shadow .2s;
+}
+.cad-inicio:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(201,168,76,.5); }
+.cad-inicio svg { width: 15px; height: 15px; }
+@keyframes cadGoldS { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+
+/* Conteúdo agora ocupa 100% do main-content — o tree vive na Sidebar */
+
+/* ── Folder rows (Ciclo / Matéria / Tema) ── */
+.cad-node { display: flex; flex-direction: column; }
+.cad-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--cad-white);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background .15s, border-color .15s;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  font-size: 13.5px;
+}
+.cad-row:hover { background: rgba(255,255,255,.03); border-color: var(--cad-line-soft); }
+.cad-row.active {
+  background: rgba(201,168,76,.10);
+  border-color: var(--cad-goldLine);
+  color: var(--cad-gold-soft);
+}
+.cad-row.disabled {
+  color: var(--cad-muted2);
+  cursor: not-allowed;
+}
+.cad-row.disabled:hover { background: transparent; border-color: transparent; }
+
+.cad-chev {
+  width: 14px; height: 14px; flex-shrink: 0;
+  color: var(--cad-muted);
+  transition: transform .18s;
+}
+.cad-chev.open { transform: rotate(90deg); color: var(--cad-gold); }
+.cad-chev.hidden { visibility: hidden; }
+
+.cad-ico { font-size: 15px; line-height: 1; flex-shrink: 0; }
+.cad-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cad-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .3px;
+  padding: 2px 8px; border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  color: var(--cad-muted);
+}
+.cad-badge.soon {
+  background: rgba(255,255,255,.04); color: var(--cad-muted);
+  border: 1px solid var(--cad-line-soft);
+}
+.cad-badge.gold {
+  background: rgba(201,168,76,.12); color: var(--cad-gold-soft);
+  border: 1px solid var(--cad-goldLine);
+}
+
+/* nesting */
+.cad-children { padding-left: 20px; display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+.cad-children.deep { padding-left: 34px; }
+
+/* ── Coluna central: hero card + content-area vivem soltos aqui ── */
+.cad-content { min-height: 400px; display: flex; flex-direction: column; }
+.cad-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; text-align: center; color: var(--cad-muted);
+  gap: 10px; min-height: 300px;
+  border: 1px solid var(--cad-goldLine);
+  background: rgba(255,255,255,.03);
+  border-radius: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+.cad-empty h3 { color: var(--cad-gold-soft); margin: 0; font-size: 26px; letter-spacing: -.02em; font-weight: 700; }
+.cad-empty p { margin: 0; font-size: 15px; line-height: 1.6; max-width: 480px; }
+
+/* Breadcrumb + subtemas rail */
+.cad-breadcrumb {
+  font-size: 12px; color: var(--cad-muted2); letter-spacing: .3px; margin-bottom: 10px;
+}
+.cad-breadcrumb b { color: var(--cad-gold-soft); font-weight: 700; }
+
+.cad-topic-title {
+  font-size: 34px; letter-spacing: -.055em; line-height: 1;
+  margin: 4px 0 10px; color: var(--cad-white); font-weight: 700;
+}
+.cad-topic-intro {
+  color: #D8DCE4; line-height: 1.55; font-size: 15px; margin: 0 0 18px;
+}
+
+/* ── Topbar (título + ações Plano/Marcar como estudado) ── */
+.cad-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.cad-hello h1 {
+  margin: 0 0 6px;
+  font-size: 34px;
+  letter-spacing: -.06em;
+  line-height: 1;
+  color: var(--cad-white);
+  font-weight: 700;
+}
+.cad-hello p {
+  margin: 0;
+  color: var(--cad-muted);
+  line-height: 1.45;
+  font-size: 14px;
+}
+.cad-top-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.cad-btn {
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(255,255,255,.04);
+  color: var(--cad-white);
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: .3px;
+  cursor: pointer;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.cad-btn:hover:not(:disabled) { border-color: var(--cad-goldLine); transform: translateY(-1px); }
+.cad-btn:disabled { opacity: .45; cursor: not-allowed; }
+.cad-btn.gold {
+  background:
+    linear-gradient(135deg, #8B6914 0%, #E8D08A 40%, #C9A84C 75%, #8B6914 100%);
+  background-size: 200% 200%;
+  color: #070707;
+  border-color: rgba(255,255,255,.18);
+  box-shadow:
+    0 16px 44px rgba(201,168,76,.32),
+    inset 0 1px 0 rgba(255,255,255,.35);
+  animation: cadGoldShine 5s ease-in-out infinite;
+}
+@keyframes cadGoldShine { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.cad-btn.gold:hover:not(:disabled) { box-shadow: 0 20px 52px rgba(212,175,55,.35); }
+.cad-btn.gold.done {
+  background: transparent;
+  color: var(--cad-gold-soft);
+  border: 1px solid var(--cad-goldLine);
+  box-shadow: none;
+}
+.cad-btn.gold.done:hover:not(:disabled) { background: rgba(201,168,76,.08); }
+
+.cad-feedback {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(201,168,76,.10);
+  border: 1px solid var(--cad-goldLine);
+  color: var(--cad-gold-soft);
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  animation: cadFadeIn .3s ease-out;
+}
+@keyframes cadFadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ── Layout de 2 colunas ── */
+.cad-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .cad-layout { grid-template-columns: 1fr; }
+}
+
+/* ── Hero card: dark premium com fio dourado no topo ── */
+.cad-hero-card {
+  position: relative;
+  border: 1px solid var(--cad-line);
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015));
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+.cad-hero-card::before {
+  content: '';
+  position: absolute; top: 0; left: 24px; right: 24px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cad-gold), transparent);
+  opacity: .65;
+}
+.cad-hero-card .cad-breadcrumb { margin-bottom: 10px; }
+.cad-hero-card .cad-topic-title {
+  font-size: 44px; letter-spacing: -.07em; line-height: .98; margin: 0;
+  color: var(--cad-white); font-weight: 700;
+}
+.cad-hero-card .cad-topic-intro {
+  color: #D8DCE4; line-height: 1.55; font-size: 17px; max-width: 760px; margin: 16px 0 0;
+}
+
+.cad-content-area { display: grid; gap: 14px; }
+
+/* ── Rail direita (3 cards + rolagem) ── */
+.cad-rail {
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.cad-rail::-webkit-scrollbar { width: 6px; }
+.cad-rail::-webkit-scrollbar-track { background: transparent; }
+.cad-rail::-webkit-scrollbar-thumb { background: rgba(201,168,76,.25); border-radius: 3px; }
+.cad-rail::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,.45); }
+
+.cad-rail-card {
+  position: relative;
+  border: 1px solid var(--cad-line);
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.04);
+  overflow: hidden;
+}
+.cad-rail-card::before {
+  content: '';
+  position: absolute; top: 0; left: 16px; right: 16px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,.4), transparent);
+}
+.cad-rail-card h3 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  letter-spacing: -.045em;
+  color: var(--cad-white);
+  font-weight: 700;
+}
+
+/* Progresso */
+.cad-progress-wrap { margin-top: 4px; }
+.cad-progress-top {
+  display: flex; justify-content: space-between;
+  color: var(--cad-muted); font-size: 13px; margin-bottom: 8px; font-weight: 600;
+}
+.cad-progress-top span:last-child { color: var(--cad-gold-soft); font-family: 'JetBrains Mono', monospace; }
+.cad-bar { height: 10px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden; }
+.cad-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8B6914, var(--cad-gold) 55%, var(--cad-gold-soft));
+  border-radius: 999px;
+  box-shadow: 0 0 14px rgba(201,168,76,.4);
+  transition: width .35s ease;
+  min-width: 0;
+}
+.cad-progress-sub {
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--cad-muted2);
+  letter-spacing: .3px;
+}
+
+/* Checklist */
+.cad-tasks { display: grid; gap: 10px; }
+.cad-task {
+  display: flex; gap: 10px; align-items: flex-start;
+  color: #D7DBE3; line-height: 1.4; font-size: 14px;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: 8px;
+  transition: background .15s;
+}
+.cad-task:hover { background: rgba(255,255,255,.03); }
+.cad-task input[type="checkbox"] {
+  accent-color: var(--cad-gold);
+  margin-top: 3px;
+  width: 16px; height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.cad-subtemas-title {
+  font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--cad-gold-soft); margin-bottom: 10px;
+}
+.cad-subtema-list { display: grid; gap: 8px; }
+.cad-subtema-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 11px 13px;
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(255,255,255,.03);
+  border-radius: 12px;
+  color: var(--cad-white);
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer; text-align: left;
+  transition: border-color .15s, background .15s;
+}
+.cad-subtema-btn:hover { border-color: var(--cad-goldLine); }
+.cad-subtema-btn.active {
+  border-color: var(--cad-goldLine);
+  background: rgba(201,168,76,.10);
+  color: var(--cad-gold-soft);
+}
+.cad-subtema-btn small { color: var(--cad-muted2); font-size: 10px; font-weight: 500; letter-spacing: .5px; }
+
+/* Tabs de estudo */
+.cad-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0 16px;
+}
+.cad-tab {
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(255,255,255,.035);
+  color: #D9DDE5;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+.cad-tab:hover { border-color: var(--cad-line); }
+.cad-tab.active {
+  border-color: var(--cad-goldLine);
+  background: rgba(201,168,76,.12);
+  color: var(--cad-gold-soft);
+}
+
+/* ── Estilos do CONTEÚDO (extraídos do mock) ── */
+.cad-content .study-section {
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(255,255,255,.03);
+  border-radius: 20px;
+  padding: 22px;
+}
+.cad-content .study-section h3 {
+  margin: 0 0 12px; font-size: 24px; letter-spacing: -.045em; color: var(--cad-gold-soft);
+}
+.cad-content .study-section p {
+  margin: 0 0 14px; color: #D9DDE5; line-height: 1.65; font-size: 15.5px;
+}
+.cad-content .lesson-title {
+  font-size: 26px; line-height: 1.15; margin-bottom: 18px;
+  color: var(--cad-gold-soft); letter-spacing: -.03em;
+}
+.cad-content .lesson-subtitle {
+  font-size: 19px; margin: 26px 0 10px; color: #fff; letter-spacing: -.02em;
+}
+.cad-content .gold, .cad-content .lesson-subtitle .gold {
+  color: var(--cad-gold); font-weight: 800;
+}
+/* .blue (destaque secundário do conteúdo) reduzido para ouro-suave — mesma família cromática */
+.cad-content .blue { color: var(--cad-gold-soft); font-weight: 700; }
+.cad-content .lesson-key {
+  border: 1px solid var(--cad-goldLine);
+  background: rgba(201,168,76,.08);
+  border-radius: 16px; padding: 16px 18px; margin: 18px 0;
+  color: #FFECC0; font-weight: 600; line-height: 1.65;
+  font-size: 15.5px;
+}
+.cad-content .lesson-key b { color: #fff; font-weight: 700; }
+/* Bloco de atenção padronizado no ouro (era azul) */
+.cad-content .lesson-alert {
+  border: 1px solid var(--cad-goldLine);
+  background: rgba(201,168,76,.05);
+  border-left: 3px solid var(--cad-gold);
+  border-radius: 12px; padding: 16px 18px; margin: 18px 0;
+  color: #E4E8F0; line-height: 1.65;
+  font-size: 15.5px;
+}
+.cad-content .lesson-alert b { color: var(--cad-gold-soft); font-weight: 700; }
+.cad-content .lesson-final {
+  border: 1px solid var(--cad-goldLine);
+  background: linear-gradient(135deg, rgba(201,168,76,.14), rgba(201,168,76,.04));
+  border-radius: 16px; padding: 18px; margin: 22px 0 4px;
+  color: #F0EDE6; font-size: 15.5px; line-height: 1.65;
+}
+/* Callout: fundo neutro com fio dourado à esquerda (era azul) */
+.cad-content .callout {
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(255,255,255,.03);
+  border-left: 3px solid var(--cad-gold);
+  border-radius: 12px; padding: 16px 18px;
+  color: #E4E8F0; line-height: 1.65; margin-top: 12px;
+  font-size: 15.5px;
+}
+.cad-content .callout b { color: var(--cad-gold-soft); font-weight: 700; }
+.cad-content .base-phrase {
+  border: 1px solid var(--cad-goldLine);
+  background: rgba(201,168,76,.07);
+  border-radius: 16px; padding: 16px 18px; margin: 16px 0;
+  color: #FFECC0; line-height: 1.65;
+  font-size: 15.5px;
+}
+.cad-content .base-phrase b { color: #fff; font-weight: 700; }
+/* Warning/pegadinhas: paleta padronizada em ouro (não mais vermelho) */
+.cad-content .warning {
+  border: 1px solid var(--cad-goldLine);
+  background: rgba(201,168,76,.07);
+  border-radius: 16px; padding: 15px;
+  color: #FFECC0; line-height: 1.55; margin-top: 12px;
+}
+.cad-content .warning b { color: var(--cad-gold-soft); }
+.cad-content .warning ol { margin: 10px 0 0 20px; padding: 0; display: grid; gap: 6px; }
+.cad-content .trap-list { display: grid; gap: 10px; margin-top: 10px; }
+.cad-content .trap-item {
+  display: grid; grid-template-columns: 34px 1fr; gap: 10px;
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(0,0,0,.22);
+  border-radius: 14px; padding: 11px;
+}
+.cad-content .trap-number {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(201,168,76,.14);
+  border: 1px solid var(--cad-goldLine);
+  color: var(--cad-gold-soft); font-weight: 900;
+}
+.cad-content .trap-item p { margin: 0 0 6px; color: #E4E8F0; line-height: 1.5; }
+.cad-content .trap-item p:last-child { margin-bottom: 0; }
+.cad-content .trap-item b { color: var(--cad-gold-soft); }
+
+.cad-content .confusion-list { display: grid; gap: 12px; margin-top: 14px; }
+.cad-content .confusion-item {
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.18);
+  border-radius: 16px; padding: 14px;
+}
+.cad-content .confusion-item p { margin: 0 0 8px; color: #DDE1E8; line-height: 1.5; }
+.cad-content .confusion-item p:last-child { margin-bottom: 0; }
+.cad-content .confusion-item b { color: #fff; }
+
+/* Questões */
+.cad-content .question-type-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 16px; }
+.cad-content .qtype {
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(255,255,255,.04);
+  color: #DDE1E8; border-radius: 999px;
+  padding: 10px 14px; font-weight: 800; font-size: 12.5px;
+  font-family: inherit; cursor: pointer;
+}
+.cad-content .qtype.active {
+  border-color: var(--cad-goldLine);
+  background: rgba(201,168,76,.10);
+  color: var(--cad-gold-soft);
+}
+.cad-content .question {
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(0,0,0,.22);
+  border-radius: 20px; padding: 20px; margin-top: 16px;
+}
+.cad-content .question h4 {
+  margin: 0 0 14px; font-size: 18.5px; line-height: 1.35;
+  color: #F0EDE6; font-weight: 700; letter-spacing: -.01em;
+}
+.cad-content .alts { display: grid; gap: 10px; }
+.cad-content .alt {
+  width: 100%; text-align: left;
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(255,255,255,.03);
+  color: #DCE0E8; border-radius: 14px;
+  padding: 14px 16px; line-height: 1.45;
+  font-family: inherit; font-size: 15.5px; cursor: pointer;
+}
+.cad-content .alt:hover:not(:disabled) { border-color: var(--cad-goldLine); }
+.cad-content .alt:disabled { cursor: default; }
+.cad-content .alt.correct { border-color: rgba(130,232,165,.45); background: rgba(130,232,165,.08); }
+.cad-content .alt.wrong   { border-color: rgba(255,107,107,.35); background: rgba(255,107,107,.07); }
+.cad-content .explain {
+  margin-top: 16px; color: #E4E8F0; line-height: 1.7;
+  border-top: 1px solid var(--cad-line-soft); padding-top: 18px;
+}
+.cad-content .explain h4 {
+  margin: 0 0 14px; font-size: 20px; color: var(--cad-gold-soft);
+  letter-spacing: -.02em; font-weight: 700;
+}
+.cad-content .explain p {
+  margin: 0 0 16px; font-size: 16.5px; line-height: 1.7;
+}
+.cad-content .explain p b { color: #fff; font-weight: 700; }
+.cad-content .warning {
+  padding: 18px; margin-top: 16px; font-size: 15.5px; line-height: 1.65;
+}
+.cad-content .warning b { font-size: 16.5px; }
+.cad-content .warning .trap-item p { font-size: 15px; line-height: 1.55; }
+.cad-content .callout {
+  padding: 18px; margin-top: 14px; font-size: 15.5px; line-height: 1.65;
+}
+/* callout b — herda cor definida acima (var(--cad-gold-soft)) */
+
+/* ── Flashcards premium com flip 3D suave ── */
+.cad-content .flashcards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px; margin-top: 12px;
+}
+@media (max-width: 640px) { .cad-content .flashcards { grid-template-columns: 1fr; } }
+
+.cad-content .flashcard {
+  height: 160px;
+  perspective: 900px;
+  cursor: pointer;
+}
+.cad-content .flash-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  transition: transform .45s cubic-bezier(.55,.1,.25,1);
+  transform-style: preserve-3d;
+  will-change: transform;
+  transform-origin: 50% 50%;
+}
+.cad-content .flashcard.flipped .flash-inner { transform: rotateX(180deg); }
+.cad-content .flashcard:not(.flipped):hover .flash-inner {
+  transform: rotateX(6deg); /* dica visual sutil só sem estar virado */
+}
+
+.cad-content .front,
+.cad-content .back {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; line-height: 1.45;
+  font-size: 15px;
+  overflow: hidden;
+}
+
+/* Face frontal — vidro escuro premium */
+.cad-content .front {
+  color: #F0EDE6; font-weight: 700; letter-spacing: -.01em;
+  border: 1px solid rgba(201,168,76,.18);
+  background:
+    linear-gradient(160deg, rgba(255,255,255,.05) 0%, rgba(255,255,255,.015) 55%, rgba(0,0,0,.25) 100%),
+    linear-gradient(180deg, #10131C, #0A0D14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 -1px 0 rgba(0,0,0,.4),
+    0 12px 30px rgba(0,0,0,.45);
+}
+.cad-content .front::before {
+  content: '';
+  position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,.6), transparent);
+}
+
+/* Face traseira — ouro sofisticado, não "barro" */
+.cad-content .back {
+  transform: rotateX(180deg);
+  color: #F5EFD9; font-weight: 600;
+  border: 1px solid rgba(201,168,76,.38);
+  background:
+    linear-gradient(160deg, rgba(232,208,138,.10) 0%, rgba(201,168,76,.05) 55%, rgba(0,0,0,.35) 100%),
+    linear-gradient(180deg, #14100A, #0B0906);
+  box-shadow:
+    inset 0 1px 0 rgba(255,235,180,.18),
+    inset 0 -1px 0 rgba(0,0,0,.5),
+    0 14px 36px rgba(0,0,0,.55),
+    0 0 24px rgba(201,168,76,.08);
+}
+.cad-content .back::before {
+  content: '';
+  position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232,208,138,.85), transparent);
+}
+.cad-content .back::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 100%, rgba(201,168,76,.10), transparent 60%);
+  pointer-events: none;
+}
+
+/* Modelo padrão */
+.cad-content .standard-model h3 { font-size: 22px; color: var(--cad-gold-soft); margin: 0 0 10px; letter-spacing: -.02em; }
+.cad-content .standard-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px; margin-top: 14px;
+}
+@media (max-width: 640px) { .cad-content .standard-grid { grid-template-columns: 1fr; } }
+.cad-content .standard-card {
+  border: 1px solid var(--cad-line-soft);
+  background: rgba(255,255,255,.03);
+  border-radius: 14px; padding: 12px;
+}
+.cad-content .standard-card h4 { margin: 0 0 6px; font-size: 14px; color: var(--cad-gold); }
+.cad-content .standard-card p { margin: 0; color: #D9DDE5; font-size: 13px; line-height: 1.55; }
+.cad-content .standard-prompt {
+  border: 1px solid var(--cad-goldLine);
+  background: rgba(201,168,76,.08);
+  border-radius: 14px; padding: 15px; margin-top: 14px;
+  color: #FFECC0; line-height: 1.6; font-size: 13.5px;
+}

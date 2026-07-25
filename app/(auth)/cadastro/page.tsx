@@ -104,7 +104,7 @@ export default function CadastroPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${location.origin}/auth/callback?next=/onboarding`,
+          redirectTo: `${location.origin}/auth/callback?next=/dashboard`,
           queryParams: { prompt: 'select_account' },
         },
       });
@@ -160,7 +160,7 @@ export default function CadastroPage() {
             full_name: nomeTrim,
             phone: phoneE164,
           },
-          emailRedirectTo: `${location.origin}/auth/callback?next=/onboarding`,
+          emailRedirectTo: `${location.origin}/auth/callback?next=/dashboard`,
         },
       });
 
@@ -177,7 +177,7 @@ export default function CadastroPage() {
       }
 
       if (data.session) {
-        router.push('/onboarding');
+        router.push('/dashboard');
         return;
       }
 

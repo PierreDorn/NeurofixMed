@@ -104,7 +104,8 @@ function LoginPageInner() {
     setGoogleLoading(true);
     try {
       const supabase = createSupabaseBrowserClient();
-      const next = tab === 'cadastro' ? '/onboarding' : '/dashboard';
+      // Onboarding arquivado — todos vão para /dashboard.
+      const next = '/dashboard';
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

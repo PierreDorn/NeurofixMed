@@ -1,7 +1,7 @@
 import { Sidebar } from '@/components/Sidebar';
-import NotificationCenter from '@/components/notifications/NotificationCenter';
 import { createServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import { CadernoProvider } from './dashboard/caderno/CadernoContext';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerClient();
@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const [{ data: profile }, { data: settings }] = await Promise.all([
     supabase
       .from('student_profiles')
-      .select('perfil_cognitivo, semestre, onboarding_done')
+      .select('perfil_cognitivo, semestre')
       .eq('user_id', user.id)
       .single(),
     supabase
@@ -26,13 +26,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const temaClass   = settings?.tema_preferido === 'light' ? 'tema-claro' : '';
 
   return (
-    <div className={['app-shell', perfilClass, temaClass].filter(Boolean).join(' ')}>
-      <Sidebar />
-      <div className="main-content">
-        {children}
+    <CadernoProvider>
+      <div className={['app-shell', perfilClass, temaClass].filter(Boolean).join(' ')}>
+        <Sidebar />
+        <div className="main-content">
+          {children}
+        </div>
       </div>
-      {/* MVP: NotificationCenter desconectado. Ver lancamento-futuro/05-agenda-notificacoes-srs.md */}
-      {false && <NotificationCenter />}
-    </div>
+    </CadernoProvider>
   );
 }

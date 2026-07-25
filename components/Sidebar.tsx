@@ -5,57 +5,38 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import { updateUserSettings } from '@/app/(app)/configuracoes/actions';
+import CadernoTree from '@/app/(app)/dashboard/caderno/CadernoTree';
+import '@/app/(app)/dashboard/caderno/caderno.css';
+import { V73_ENABLED } from '@/lib/flags';
+import { Home, BookOpen, NotebookPen, Repeat, HelpCircle, Layers, BarChart3, Star } from 'lucide-react';
 
-const navItems = [
-  {
-    href: '/dashboard',
-    label: 'Início',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-    ),
-  },
-  {
-    href: '/ia',
-    label: 'Estudar com IA',
-    hidden: true, // MVP: oculto visualmente — funções/rotas preservadas. Ver lancamento-futuro/04-sidebar-estudar-ia.md
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/>
-        <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8z"/>
-        <path d="M5 14l.6 1.6L7 16l-1.4.4L5 18l-.6-1.6L3 16l1.4-.4z"/>
-      </svg>
-    ),
-  },
-  {
-    href: '/biblioteca',
-    label: 'Biblioteca',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-      </svg>
-    ),
-  },
-  {
-    href: '/flashcards',
-    label: 'Flashcards',
-    hidden: true, // MVP: oculto visualmente — funções/rotas preservadas. Ver lancamento-futuro/README.md
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="5" width="20" height="14" rx="2"/>
-        <line x1="2" y1="10" x2="22" y2="10"/>
-      </svg>
-    ),
-  },
-];
+// Sidebar reduzida em 2026-07-09.
+// Itens de navegação (Início, Biblioteca, Neuro IA, Flashcards) e o item
+// "Notificações" do menu da bolinha foram removidos junto com o arquivamento
+// das rotas correspondentes em lancamento-futuro/paginas-arquivadas-2026-07-09/.
+// A bolinha dourada (NF popup) segue funcionando com Configurações + Ajuda.
+type NavItem = { href: string; label: string; hidden?: boolean; icon: React.ReactNode };
+
+// Itens V73 aparecem SOMENTE quando NEXT_PUBLIC_V73_ENABLED=1.
+// Atenção: NEXT_PUBLIC_* é congelada em build time — mudar .env.local exige restart do `next dev`.
+const v73Items: NavItem[] = V73_ENABLED
+  ? [
+      { href: '/home', label: 'Início', icon: <Home size={16} /> },
+      { href: '/subjects', label: 'Matérias', icon: <BookOpen size={16} /> },
+      { href: '/notebook', label: 'Caderno', icon: <NotebookPen size={16} /> },
+      { href: '/review', label: 'Revisão', icon: <Repeat size={16} /> },
+      { href: '/questions', label: 'Questões', icon: <HelpCircle size={16} /> },
+      { href: '/flashcards', label: 'Flashcards', icon: <Layers size={16} /> },
+      { href: '/progress', label: 'Progresso', icon: <BarChart3 size={16} /> },
+      { href: '/favorites', label: 'Favoritos', icon: <Star size={16} /> },
+    ]
+  : [];
+
+const navItems: NavItem[] = [...v73Items];
 
 const menuItems = [
   { icon: '⚙️', label: 'Configurações', href: '/configuracoes', disabled: false },
-  { icon: '🔔', label: 'Notificações',   href: '/configuracoes#notificacoes', disabled: true  }, // MVP: ver lancamento-futuro/05-agenda-notificacoes-srs.md
-  { icon: '❓', label: 'Ajuda',          href: '#',        disabled: true  },
+  { icon: '❓', label: 'Ajuda',          href: '#',              disabled: true  },
 ];
 
 export function Sidebar() {
@@ -107,24 +88,30 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* Navegação */}
-      <div className="nav-wrap">
-        <div className="nav-title">Estudar</div>
-        <nav className="sidebar-nav-list">
-          {navItems.filter((item) => !(item as { hidden?: boolean }).hidden).map((item) => {
-            const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`nav-link${isActive ? ' active' : ''}`}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                <span className="nav-label">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+      {/* Navegação — oculta quando não há itens (features arquivadas em 2026-07-09) */}
+      {navItems.filter((item) => !item.hidden).length > 0 && (
+        <div className="nav-wrap">
+          <div className="nav-title">Estudar</div>
+          <nav className="sidebar-nav-list">
+            {navItems.filter((item) => !item.hidden).map((item) => {
+              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-link${isActive ? ' active' : ''}`}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  <span className="nav-label">{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+      {/* Bloco de notas (Início + árvore Ciclo → Matéria → Tema) */}
+      <div className="cad-sidebar-slot">
+        <CadernoTree />
       </div>
 
       {/* Theme toggle */}
@@ -151,11 +138,14 @@ export function Sidebar() {
         </button>
       </div>
 
-      {/* Footer badge */}
-      <div className="sidebar-footer">
-        <span className="sidebar-footer-badge">Biblioteca ativa</span>
-        <p>Conteúdos organizados para revisar, conectar e fixar medicina.</p>
-      </div>
+      {/* Footer badge — oculto em 2026-07-09 junto com o arquivamento da biblioteca.
+          Mantido no código pra reativação futura. */}
+      {false && (
+        <div className="sidebar-footer">
+          <span className="sidebar-footer-badge">Sua biblioteca médica</span>
+          <p>Tudo organizado para revisar, conectar e fixar de verdade.</p>
+        </div>
+      )}
 
       {/* Botão NF + Menu flutuante */}
       <div
@@ -168,7 +158,7 @@ export function Sidebar() {
               <div className="nf-menu-avatar">NF</div>
               <div>
                 <div className="nf-menu-account-name">NeuroFix Med</div>
-                <div className="nf-menu-account-sub">Minha conta</div>
+                <div className="nf-menu-account-sub">Sua conta</div>
               </div>
             </div>
 
